@@ -1,0 +1,4 @@
+
+    <script src="/scripts/bootstrap.bundle.js"></script>
+    </body>
+</html>
