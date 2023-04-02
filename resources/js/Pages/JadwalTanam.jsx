@@ -1,7 +1,7 @@
 import { Layout } from '@/Components/layout';
 import update from "immutability-helper"
 import { Head, Link } from '@inertiajs/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '@/Config/api';
 import CreatableSelect from 'react-select/creatable';
@@ -10,6 +10,7 @@ import {FiChevronLeft, FiChevronRight} from "react-icons/fi"
 import { Modal, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { isUndefined } from '@/Config/config';
 import { arrayMonths } from '@/Config/helpers';
+import AnimateLineChart from '@/Components/Modules/animate_line_chart';
 
 export default class JadwalTanam extends React.Component{
     state={
@@ -152,7 +153,7 @@ export default class JadwalTanam extends React.Component{
                 <Head>
                     <title>Jadwal Tanam</title>
                 </Head>
-                <Layout>
+                <Layout {...this.props}>
                     <div id="content-section" className='d-block' style={{marginTop:"80px", marginBottom:"80px"}}>
                         <div className='container'>
                             <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
@@ -183,6 +184,7 @@ export default class JadwalTanam extends React.Component{
                                         typeFilter={this.typeFilter}
                                         setPerPage={this.setPerPage}
                                         toggleDetail={this.toggleDetail}
+                                        goToPage={this.goToPage}
                                     />
                                 </div>
                             </div>
@@ -199,7 +201,7 @@ export default class JadwalTanam extends React.Component{
     }
 }
 
-const Table=({data, typeFilter, setPerPage, toggleDetail})=>{
+const Table=({data, typeFilter, setPerPage, goToPage, toggleDetail})=>{
     return (
         <div className='card'>
             <div className='card-body'>
@@ -316,7 +318,14 @@ const Table=({data, typeFilter, setPerPage, toggleDetail})=>{
 }
 
 const ModalDetail=({data, hideModal})=>{
+    const [tab_open, setTabOpen]=useState("cabai-besar")
     const ch_toleransi=20
+
+    useEffect(()=>{
+        if(data.is_open==true){
+            setTabOpen("cabai-besar")
+        }
+    }, [data])
 
     const curah_hujan=()=>{
         let curah_hujan=!isUndefined(data.data.curah_hujan)?data.data.curah_hujan:[]
@@ -345,6 +354,7 @@ const ModalDetail=({data, hideModal})=>{
         return new_curah_hujan
     }
 
+    //VALUES
     const jadwal_tanam_cabai_besar=()=>{
         let ch_ignore=[]
         let ch_data=[]
@@ -515,6 +525,7 @@ const ModalDetail=({data, hideModal})=>{
                     defaultActiveKey="cabai-besar"
                     id="tab-detail-jadwal-tanam"
                     className="mb-3 mt-3"
+                    onSelect={e=>setTabOpen(e)}
                 >
                     <Tab eventKey="cabai-besar" title="Cabai Besar">
                         <p>Curah hujan optimal untuk cabai merah adalah <strong>100-200mm/bulan</strong></p>
@@ -631,6 +642,14 @@ const ModalDetail=({data, hideModal})=>{
                         </div>
                     </Tab>
                 </Tabs>
+                <div className='mt-3'>
+                    <span className='fw-semibold fs-5 d-flex mb-2'>Grafik Curah Hujan</span>
+                    {data.is_open&&
+                        <AnimateLineChart
+                            data={curah_hujan()}
+                        />
+                    }
+                </div>
             </Modal.Body>
             <Modal.Footer className="mt-3 border-top pt-2">
                 <button 

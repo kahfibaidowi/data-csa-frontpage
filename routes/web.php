@@ -18,4 +18,10 @@ use Inertia\Inertia;
 
 Route::get('/', [FrontpageController::class, "index"]);
 Route::get('/peringatan_dini', [FrontpageController::class, "peringatan_dini"]);
+Route::get('/peringatan_dini/banjir', [FrontpageController::class, "peringatan_dini_banjir"]);
+Route::get('/peringatan_dini/kekeringan', [FrontpageController::class, "peringatan_dini_kekeringan"]);
 Route::get('/jadwal_tanam', [FrontpageController::class, "jadwal_tanam"]);
+Route::get('/info_grafis', [FrontpageController::class, "info_grafis"]);
+Route::get('/posts', [FrontpageController::class, "posts"]);
+Route::get('/posts/page/{page}', [FrontpageController::class, "posts"]);
+Route::get('/post/{id}/{title}', [FrontpageController::class, "post"]);

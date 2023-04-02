@@ -2,11 +2,11 @@ import { Layout } from "@/Components/layout"
 import { api } from "@/Config/api"
 import axios from "axios"
 import React from "react"
-import MapWindy from "@/Components/Modules/map_windy"
+import MapWindy from "@/Components/Modules/map_windy_kekeringan"
 import { BASE_URL, isUndefined } from "@/Config/config"
 import { Head } from "@inertiajs/react"
 import { toast, ToastContainer } from "react-toastify"
-import { FiChevronDown, FiCloudRain, FiHome, FiMenu, FiWind } from "react-icons/fi"
+import { FiBarChart2, FiChevronDown, FiCloudRain, FiHome, FiMenu, FiWind } from "react-icons/fi"
 import * as turf from '@turf/turf'
 import { centroid } from "@/Config/helpers"
 import { Collapse, Offcanvas } from "react-bootstrap"
@@ -286,7 +286,7 @@ class Frontpage extends React.Component{
         return (
             <>
                 <Head>
-                    <title>Peringatan Dini</title>
+                    <title>Peringatan Dini Kekeringan</title>
                 </Head>
                 <MapWindy
                     data={map_curah_hujan} 
@@ -327,6 +327,12 @@ class Frontpage extends React.Component{
                                         <span class="link-title">Dashboard</span>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="/info_grafis" class="nav-link">
+                                        <FiBarChart2 className="link-icon"/>
+                                        <span class="link-title">Infografis</span>
+                                    </a>
+                                </li>
                                 <li 
                                     className={classNames(
                                         "nav-item",
@@ -346,12 +352,12 @@ class Frontpage extends React.Component{
                                         <div>
                                             <ul className="nav sub-menu">
                                                 <li className="nav-item">
-                                                    <a href="/peringatan_dini/banjir" className={classNames("nav-link", "active")}>
+                                                    <a href="/peringatan_dini/banjir" className={classNames("nav-link")}>
                                                         Banjir
                                                     </a>
                                                 </li>
                                                 <li className="nav-item">
-                                                    <a href="/peringatan_dini/kekeringan" className={classNames("nav-link")}>
+                                                    <a href="/peringatan_dini/kekeringan" className={classNames("nav-link", "active")}>
                                                         Kekeringan
                                                     </a>
                                                 </li>

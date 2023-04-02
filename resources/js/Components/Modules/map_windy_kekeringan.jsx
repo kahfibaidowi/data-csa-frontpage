@@ -1,29 +1,19 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import update from "immutability-helper"
 import { isUndefined, mapbox_access_token, WINDY_KEY } from "@/Config/config"
-import { Map, LayersControl, TileLayer, Marker, Popup, GeoJSON, Tooltip, ZoomControl, useLeaflet, MapControl } from "react-windy-leaflet"
+import { Map, LayersControl, TileLayer, Marker, Popup, GeoJSON, Tooltip, ZoomControl, useLeaflet } from "react-windy-leaflet"
 import CreatableSelect from "react-select/creatable"
-import { FiHome, FiMenu, FiSearch } from "react-icons/fi"
+import { FiAlertTriangle, FiHome, FiMenu, FiSearch } from "react-icons/fi"
 import Select from "react-select"
 import { Dropdown, Offcanvas } from "react-bootstrap"
 import * as turf from '@turf/turf'
 import AsyncSelect from 'react-select/async'
 import { AsyncTypeahead, Highlighter, Typeahead } from "react-bootstrap-typeahead"
+import classNames from "classnames"
 
 
 const { BaseLayer, Overlay } = LayersControl;
 
-const geojson=[[[[111.63005999957039,-7.524659999758398],[111.63202999958588,-7.525120000286961],[111.63368000013293,-7.52591999940762],[111.63370999971778,-7.526159999683443],[111.63384999987863,-7.52660999975086],[111.63399999960137,-7.526899999634452],[111.63411000017743,-7.527099999864276],[111.63414000066155,-7.527260000048159],[111.63404000144595,-7.52754999993175],[111.63390000038578,-7.527769999285226],[111.63378000114716,-7.52788999942311],[111.63364000008698,-7.527899999884255],[111.63296000020489,-7.527560000392896],[111.63236999997656,-7.527320000117129],[111.63217000064606,-7.52728000007113],[111.63199000133852,-7.527369998825577],[111.63193000037029,-7.527469999839809],[111.63195000039326,-7.527650000046663],[111.6321299997008,-7.527990000437342],[111.63234277210228,-7.528263776551228],[111.6324500000685,-7.528410000020699],[111.6324849998839,-7.528749998612739],[111.63243000004553,-7.52897999932668],[111.6323200003688,-7.529120000386911],[111.63210000011594,-7.529219998703184],[111.63161999956435,-7.529369999325183],[111.63134000014196,-7.529499999924269],[111.63121000134151,-7.529640000085124],[111.63111231158496,-7.529835377799657],[111.63109000030431,-7.530030000083627],[111.63113000035031,-7.530169999345162],[111.63172816642282,-7.530648531303882],[111.63187999986314,-7.530770000034693],[111.63185999984017,-7.530899999734402],[111.63111999988911,-7.531229998764616],[111.63098000062757,-7.531299999294731],[111.63078999995957,-7.531379999386672],[111.63070999986763,-7.531630000123585],[111.63074408417322,-7.531794826069586],[111.63117999995808,-7.53231000000568],[111.63147500007227,-7.53265499972764],[111.63189999988612,-7.533150000071657],[111.6319550006238,-7.53338500011688],[111.63163000002555,-7.533569998755638],[111.63111999988911,-7.533749999861811],[111.63102000157284,-7.533784999677209],[111.63076000037478,-7.533930000068665],[111.63041037094291,-7.534146134135995],[111.63021000019239,-7.534269999560024],[111.63017999970828,-7.534380000136082],[111.63025000113771,-7.534499999374646],[111.63049000141348,-7.534809999281265],[111.63058000016792,-7.534919999857323],[111.63078000039775,-7.535089998703654],[111.63100000065054,-7.535289999832798],[111.63107999984317,-7.535459999578507],[111.63111000032728,-7.535679999831302],[111.63108148192589,-7.536164813554478],[111.6309900001894,-7.536469999390135],[111.6308399995674,-7.536740000150076],[111.63070999986763,-7.536839999365668],[111.63052999966078,-7.536869999849785],[111.62965000134756,-7.536969999964697],[111.62947000024138,-7.537079999641492],[111.62942000063356,-7.537159999733376],[111.62837384807568,-7.537339629419535],[111.62778087918525,-7.537325998395318],[111.62752000024886,-7.537319999917258],[111.62500000005099,-7.537030000033667],[111.62485000032831,-7.537030000033667],[111.62458261839419,-7.537030000033667],[111.62385999964033,-7.537030000033667],[111.62327000031132,-7.537050000056638],[111.62266000006002,-7.537059999618464],[111.62216000038478,-7.536649999596989],[111.62165000024834,-7.536259998699165],[111.62089000027436,-7.53542999999371],[111.62006000066953,-7.534309999605966],[111.61930000069555,-7.533259999748395],[111.6187099995679,-7.532449999267271],[111.61948000000302,-7.531890000422379],[111.62040000106026,-7.530499999274753],[111.62097999992812,-7.529359999763358],[111.62192000010896,-7.527839998916022],[111.62249000031431,-7.527170000394392],[111.62305999962035,-7.526430000443384],[111.62353000061012,-7.525840001114375],[111.6241399999621,-7.525379999686436],[111.62431000060707,-7.525290000032669],[111.62465000009848,-7.52516000033296],[111.62500000005099,-7.52509999936467],[111.626750000713,-7.524659999758398],[111.62871000026735,-7.524550000081661],[111.62927118441866,-7.524595727010364],[111.63005999957039,-7.524659999758398]]]]
-
-const legend=`<table class='mt-3'>
-<tr><td><div class='d-flex'><div class='d-flex me-1' style='width:25px;height:15px;background:#4a1400'></div> (0 - 30%)</div></td><th rowspan='3'> <span class='ms-2'>Bawah Normal</span></th></tr>
-<tr><td><div class='d-flex'><div class='d-flex me-1' style='width:25px;height:15px;background:#a65900'></div> (31 - 50%)</div></td></tr>
-<tr><td><div class='d-flex'><div class='d-flex me-1' style='width:25px;height:15px;background:#f3c40f'></div> (51 - 84%)</div></td></tr>
-<tr style='border-top:1px solid #9a9a9a'><td class='pt-1'><div class='d-flex'><div class='d-flex me-1' style='width:25px;height:15px;background:#fefe00'></div> (85 - 115%)</div></td><th> <span class='ms-2'>Normal</span></th></tr>
-<tr style='border-top:1px solid #9a9a9a'><td class='pt-1'><div class='d-flex'><div class='d-flex me-1' style='width:25px;height:15px;background:#89b700'></div> (116 - 150%)</div></td><th rowspan='3'> <span class='ms-2'>Atas Normal</span></th></tr>
-<tr><td><div class='d-flex'><div class='d-flex me-1' style='width:25px;height:15px;background:#238129'></div> (151 - 200%)</div></td></tr>
-<tr><td><div class='d-flex'><div class='d-flex me-1' style='width:25px;height:15px;background:#00460e'></div> (> 200%)</div></td></tr>
-</table>`;
 
 const MapWindy=(props)=>{
     const [bulan, setBulan]=useState("")
@@ -44,32 +34,8 @@ const MapWindy=(props)=>{
         }
     }
     const mapStyle=feature=>{
-        let color="#fefe00"
-        const select=month_selected()
-        if(select.bulan.toString()!=""){
-            const curah_hujan=feature.properties.curah_hujan[(Number(select.bulan)-1)*3+(Number(select.input_ke)-1)]
-
-            color=blockColor(curah_hujan.curah_hujan, curah_hujan.curah_hujan_normal)
-        }
-        else{
-            const curah_hujan=feature.properties.curah_hujan
-
-            let ch="", curah_hujan_normal=""
-            for(var i=0; i<curah_hujan.length; i++){
-                if(curah_hujan[i].curah_hujan.toString().trim()!=""){
-                    if(ch==""){
-                        ch=Number(curah_hujan[i].curah_hujan)
-                        curah_hujan_normal=Number(curah_hujan[i].curah_hujan_normal)
-                    }
-                    else{
-                        ch+=Number(curah_hujan[i].curah_hujan)
-                        curah_hujan_normal+=Number(curah_hujan[i].curah_hujan_normal)
-                    }
-                }
-            }
-
-            color=blockColor(ch, curah_hujan_normal)
-        }
+        const curah_hujan=curahHujan(feature)
+        const color=blockColor(curah_hujan.curah_hujan, curah_hujan.curah_hujan_normal)
 
         return {
             stroke:true,
@@ -115,34 +81,20 @@ const MapWindy=(props)=>{
         }
     }
     const blockColor=(curah_hujan, normal)=>{
-        if(curah_hujan.toString().trim()==""||normal.toString().trim()==""){
-            return "#fefe00"
-        }
-        if(Number(normal)==0){
-            return "#fefe00"
-        }
+        const value=curah_hujan.toString().trim()!=""?Number(curah_hujan):""
 
-        const value=curah_hujan/normal;
-        if(value<=0.3){
-            return "#4a1400";
+        if(value==""){
+            return "#238c3f"
         }
-        if(value<=0.5){
-            return "#a65900";
+        
+        if(value<60){
+            return "#8c2323"
         }
-        if(value<=0.84){
-            return "#f3c40f";
+        else if(value>=60 && value<75){
+            return "#8c5f23"
         }
-        if(value<=1.15){
-            return "#fefe00"
-        }
-        if(value<=1.5){
-            return "#89b700"
-        }
-        if(value<=2){
-            return "#238129"
-        }
-        if(value>200){
-            return "#00460e"
+        else if(value>=75){
+            return "#238c3f"
         }
     }
     const sifatHujan=(curah_hujan, normal)=>{
@@ -198,21 +150,6 @@ const MapWindy=(props)=>{
     
 
     //value
-    const valueBanjir=(str_value)=>{
-        const value=str_value.toString().trim()!=""?Number(str_value):""
-        
-        if(value=="") return ""
-
-        if(value<=150){
-            return "Aman"
-        }
-        else if(value>150 && value<=200){
-            return "Waspada"
-        }
-        else if(value>200){
-            return "Rawan"
-        }
-    }
     const valueKekeringan=(str_value)=>{
         const value=str_value.toString().trim()!=""?Number(str_value):""
         
@@ -378,7 +315,7 @@ const MapWindy=(props)=>{
                             <div class="card-body p-0" style={{height:"100%"}}>
                                 <Map
                                     ref={(ref)=>mapRef.current=ref}
-                                    className={!isUndefined(props.className)?props.className:"map-responsive"}
+                                    className={classNames((!isUndefined(props.className)?props.className:"map-responsive"), (center.zoom>=9?"map-show-region":""))}
                                     windyKey={WINDY_KEY}
                                     windyLabels={false}
                                     windyControls={true}
@@ -404,12 +341,6 @@ const MapWindy=(props)=>{
                                                     />
                                                 </BaseLayer>
                                             </LayersControl>
-                                            <MapControl position="bottomleft">
-                                                <div className="d-flex flex-column">
-                                                    <h4 style='font-weight:600;font-size:0.875rem'>SIFAT HUJAN</h4>
-                                                    <div dangerouslySetInnerHTML={{__html:legend}}/>
-                                                </div>
-                                            </MapControl>
                                             {props.data.map(df=>{
                                                 const curah_hujan=curahHujan(df)
 
@@ -419,7 +350,10 @@ const MapWindy=(props)=>{
                                                         data={df}
                                                         style={mapStyle(df)}
                                                     >
-                                                        {(center.zoom>=9)&&<Tooltip direction="center" className="tooltip-region" style={{fontFamily:"Arial"}} permanent>{df.properties.region}</Tooltip>}
+                                                        <Tooltip direction="center" className="d-flex flex-column align-items-center tooltip-region" style={{fontFamily:"Poppins"}} permanent>
+                                                            {(center.zoom>=9)&&<>{df.properties.region}</>}
+                                                            {valueKekeringan(curah_hujan.curah_hujan)=="Rawan"&&<span className="blink-animation text-white fs-18px"><FiAlertTriangle/></span>}
+                                                        </Tooltip>
                                                         <Popup>
                                                             <div class='d-flex flex-column'>
                                                                 <span>Kabupaten/Kota : <strong>{df.properties.region}</strong></span>
@@ -427,7 +361,6 @@ const MapWindy=(props)=>{
                                                                 <span>Curah Hujan Normal : <strong>{curah_hujan.curah_hujan_normal}</strong></span>
                                                                 <span class='d-flex'>Sifat Hujan : <strong dangerouslySetInnerHTML={{__html:sifatHujan(curah_hujan.curah_hujan, curah_hujan.curah_hujan_normal)}}></strong></span>
                                                                 <span class='d-flex'>Sifat Bulan : <strong>{sifatBulan(curah_hujan.curah_hujan)}</strong></span>
-                                                                <span class='d-flex'>Banjir : <strong>{valueBanjir(curah_hujan.curah_hujan)}</strong></span>
                                                                 <span class='d-flex'>Kekeringan : <strong>{valueKekeringan(curah_hujan.curah_hujan)}</strong></span>
                                                             </div>
                                                         </Popup>
@@ -440,6 +373,35 @@ const MapWindy=(props)=>{
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div
+                style={{
+                    padding:"12px",
+                    position:"fixed",
+                    top:"62px",
+                    left:"12px",
+                    background:"#fff",
+                    zIndex:991
+                }}
+            >
+                <div className="d-flex flex-column">
+                    <h4 style={{fontWeight:"600", fontSize:"0.875rem"}}>KETERANGAN</h4>
+                    <table class='mt-3'>
+                        <tr>
+                            <td><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#238c3f"}}></div></div></td>
+                            <th> <span class='ms-2'>Aman</span></th>
+                        </tr>
+                        <tr style={{borderTop:"1px solid #9a9a9a"}}>
+                            <td class='pt-1'><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#8c5f23"}}></div></div></td>
+                            <th> <span class='ms-2'>Waspada</span></th>
+                        </tr>
+                        <tr style={{borderTop:"1px solid #9a9a9a"}}>
+                            <td class='pt-1'><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#8c2323"}}></div></div></td>
+                            <th> <span class='ms-2'>Rawan</span></th>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </>
