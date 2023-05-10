@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Request;
 use Inertia\Inertia;
 use App\Models\FrontpageModel;
 use App\Library\HeadLibrary;
+use App\Models\SebaranOptModel;
 
 class FrontpageController extends Controller
 {
@@ -80,6 +81,22 @@ class FrontpageController extends Controller
             'feature_column'=>$feature_column,
             'feature_row'   =>$feature_row,
             'posts_new'     =>$posts,
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+
+    public function sebaran_opt()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Sebaran OPT - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('SebaranOpt', [
             'footer'        =>$footer,
             'pengaturan'    =>$pengaturan
         ]);

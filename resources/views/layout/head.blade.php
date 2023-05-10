@@ -35,13 +35,16 @@
                             <span class="text-success">{{$pengaturan['title']}}</span>
                         @endif
                     </a>
-                    <a href="https://dashboard.ews.tifpsdku.com/login" class="btn btn-success rounded-pill order-lg-1">
+                    <a href="https://ews.tifpsdku.com/dashboard/login" class="btn btn-success rounded-pill order-lg-1">
                         Login Admin
                     </a>
                     <div class="collapse navbar-collapse" id="nav-collapse">
                         <ul class="navbar-nav mx-auto mt-2 mt-lg-0">
                             <li class="nav-item">
                                 <a class="nav-link link-dark fs-15px fw-medium" href="/">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link link-dark fs-15px fw-medium" href="/sebaran_opt">Sebaran OPT</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link link-dark fs-15px fw-medium" href="/info_grafis">Infografis</a>

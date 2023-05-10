@@ -49,3 +49,6 @@ export const centroid=(poly)=>{
     c[1] /= a*6;
     return c;
 }
+export const paginate=(array, page_size, page_number)=>{
+    return array.slice((page_number - 1) * page_size, page_number * page_size);
+}

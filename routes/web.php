@@ -25,3 +25,4 @@ Route::get('/info_grafis', [FrontpageController::class, "info_grafis"]);
 Route::get('/posts', [FrontpageController::class, "posts"]);
 Route::get('/posts/page/{page}', [FrontpageController::class, "posts"]);
 Route::get('/post/{id}/{title}', [FrontpageController::class, "post"]);
+Route::get('/sebaran_opt', [FrontpageController::class, "sebaran_opt"]);
