@@ -54,5 +54,18 @@
 
     </div>
     <script src="/scripts/bootstrap.bundle.js"></script>
+    <script>
+        if("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/service_worker.js")
+            .then(
+                function(registration){
+                    console.log("Service Worker registration successful with scope: ", registration.scope)
+                },
+                function(err){
+                    console.log("Service Worker registration failed: ", err)
+                }
+            )
+        }
+    </script>
     </body>
 </html>

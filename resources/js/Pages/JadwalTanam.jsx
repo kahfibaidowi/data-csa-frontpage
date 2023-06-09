@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import {FiChevronLeft, FiChevronRight} from "react-icons/fi"
 import { Modal, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { isUndefined } from '@/Config/config';
-import { arrayMonths } from '@/Config/helpers';
+import { arrayMonths, ceil } from '@/Config/helpers';
 import AnimateLineChart from '@/Components/Modules/animate_line_chart';
 
 export default class JadwalTanam extends React.Component{
@@ -335,7 +335,9 @@ const ModalDetail=({data, hideModal})=>{
             for(var i=1; i<=3; i++){
                 const find_curah_hujan=curah_hujan.find(f=>f.bulan.toString()==month.toString() && f.input_ke.toString()==i.toString())
                 if(!isUndefined(find_curah_hujan)){
-                    new_curah_hujan=new_curah_hujan.concat([find_curah_hujan])
+                    new_curah_hujan=new_curah_hujan.concat([Object.assign({}, find_curah_hujan, {
+                        curah_hujan:ceil(find_curah_hujan.curah_hujan)
+                    })])
                 }
                 else{
                     const data_curah_hujan={

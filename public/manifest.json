@@ -1,0 +1,27 @@
+{
+    "short_name": "Data CSA",
+    "name": "Data CSA",
+    "description":"Climate Smart Agriculture",
+    "icons": [
+      {
+        "src": "/icons/128x128.png",
+        "type": "image/png",
+        "sizes": "128x128"
+      },
+      {
+        "src": "/icons/192x192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/icons/256x256.png",
+        "type": "image/png",
+        "sizes": "256x256"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#37a647",
+    "background_color": "#37a647"
+  }
+  

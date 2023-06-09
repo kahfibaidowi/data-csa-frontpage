@@ -32,8 +32,8 @@ class Frontpage extends React.Component{
             komoditas:"",
             tahun:"",
             bulan:"",
-            provinsi:"",
-            kab_kota:"",
+            province_id:"",
+            regency_id:"",
             is_loading:false
         },
         region:{
@@ -141,10 +141,10 @@ class Frontpage extends React.Component{
             })
         }, ()=>{
             switch(target.name){
-                case "provinsi":
+                case "province_id":
                     this.setState({
                         sebaran_opt:update(this.state.sebaran_opt, {
-                            kab_kota:{$set:""}
+                            regency_id:{$set:""}
                         })
                     }, ()=>{
                         this.fetchSebaranOpt()
@@ -227,8 +227,8 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
 
         return [{label:"Semua Provinsi", value:""}].concat(prov.map(p=>{
             return {
-                label:p.provinsi,
-                value:p.provinsi
+                label:p.region,
+                value:p.id_region
             }
         }))
     }
@@ -237,11 +237,11 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
             return [{label:"Semua Kabupaten/Kota", value:""}]
         }
 
-        let filtered_kab_kota=region.kab_kota.filter(d=>d.provinsi==data.provinsi)
+        let filtered_kab_kota=region.kab_kota.filter(d=>d.nested==data.province_id)
         return [{label:"Semua Kabupaten/Kota", value:""}].concat(filtered_kab_kota.map(p=>{
             return {
-                label:p.kab_kota,
-                value:p.kab_kota
+                label:p.region,
+                value:p.id_region
             }
         }))
     }
@@ -258,7 +258,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                         options={data_provinsi()}
                                         value={data_provinsi().find(f=>f.value==data.provinsi)}
                                         onChange={e=>{
-                                            typeFilter({target:{name:"provinsi", value:e.value}})
+                                            typeFilter({target:{name:"province_id", value:e.value}})
                                         }}
                                         placeholder="Semua Provinsi"
                                     />
@@ -268,7 +268,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                         options={data_kab_kota()}
                                         value={data_kab_kota().find(f=>f.value==data.kab_kota)}
                                         onChange={e=>{
-                                            typeFilter({target:{name:"kab_kota", value:e.value}})
+                                            typeFilter({target:{name:"regency_id", value:e.value}})
                                         }}
                                         placeholder="Semua Kabupaten/Kota"
                                     />
@@ -330,8 +330,8 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                                         <td className="align-middle">{(idx+1)+((data.page-1)*data.per_page)}</td>
                                                         <td>{list.bulan}</td>
                                                         <td>{list.tahun}</td>
-                                                        <td>{list.provinsi}</td>
-                                                        <td>{list.kab_kota}</td>
+                                                        <td>{list.region.parent.region}</td>
+                                                        <td>{list.region.region}</td>
                                                         <td>{list.komoditas}</td>
                                                         <td>{list.opt}</td>
                                                         <td>{list.lts_ringan}</td>

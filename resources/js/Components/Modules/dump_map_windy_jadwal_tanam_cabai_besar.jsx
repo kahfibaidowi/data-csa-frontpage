@@ -9,33 +9,45 @@ import { Dropdown, Offcanvas } from "react-bootstrap"
 import * as turf from '@turf/turf'
 import AsyncSelect from 'react-select/async'
 import { AsyncTypeahead, Highlighter, Typeahead } from "react-bootstrap-typeahead"
-import { ceil } from "@/Config/helpers"
+import { ceil, arrayMonths } from "@/Config/helpers"
+import * as _ from "underscore"
 
 
 const { BaseLayer, Overlay } = LayersControl;
 
 
 const MapWindy=(props)=>{
-    const [bulan, setBulan]=useState("")
+    const ch_toleransi=20
     const [center, setCenter]=useState({
         latitude:-1.973,
         longitude:116.253,
         zoom:5
     })
+    const [bulan, setBulan]=useState("")
     const mapRef=useRef(null)
+
+    useEffect(()=>{
+        
+    })
+
+    //map
+    const map_data=()=>{
+        const kec= props.data.map(k=>{
+            return Object.assign({}, k.geo_json, {
+                properties:{
+                    region:k.geo_json.properties.region,
+                    jadwal_tanam:jadwal_tanam(k.geo_json.properties.curah_hujan)
+                }
+            })
+        })
+        
+        return kec
+    }
     
 
     //helpers
-    const month_selected=()=>{
-        if(bulan.toString().trim()=="") return {bulan:"", input_ke:""}
-        else{
-            const new_bulan=bulan.toString().split("_")
-            return {bulan:new_bulan[0], input_ke:new_bulan[1]}
-        }
-    }
     const mapStyle=feature=>{
-        const curah_hujan=curahHujan(feature)
-        const color=blockColor(curah_hujan.curah_hujan, curah_hujan.curah_hujan_normal)
+        const color=blockColor(feature.properties.jadwal_tanam)
 
         return {
             stroke:true,
@@ -46,127 +58,73 @@ const MapWindy=(props)=>{
             fillOpacity:.6
         }
     }
-    const curahHujan=feature=>{
-        const select=month_selected()
-        if(select.bulan.toString()!=""){
-            const curah_hujan=feature.properties.curah_hujan[(Number(select.bulan)-1)*3+(Number(select.input_ke)-1)]
+    const jadwal_tanam=(curah_hujan)=>{
+        let ch_ignore=[]
+        let ch_data=[]
+        let min=100-ch_toleransi
+        let max=200+ch_toleransi
+        let ch_raw=curah_hujan
 
-            return {
-                curah_hujan:curah_hujan.curah_hujan,
-                curah_hujan_normal:curah_hujan.curah_hujan_normal
+        ch_raw.map((ch, idx)=>{
+            let found=true
+            if(idx>27){
+                found=false
             }
-        }
-        else{
-            const curah_hujan=feature.properties.curah_hujan
+            else{
+                for(var i=idx; i<idx+9; i++){
+                    const ch_this=ceil(ch_raw[i].curah_hujan)
 
-            let ch="", curah_hujan_normal="", count_curah_hujan=0
-            for(var i=0; i<curah_hujan.length; i++){
-                if(curah_hujan[i].curah_hujan.toString().trim()!=""){
-                    if(ch==""){
-                        ch=Number(curah_hujan[i].curah_hujan)
-                        curah_hujan_normal=Number(curah_hujan[i].curah_hujan_normal)
+                    if(ch_this.toString().trim()==""){
+                        found=false
+                        break
                     }
-                    else{
-                        ch+=Number(curah_hujan[i].curah_hujan)
-                        curah_hujan_normal+=Number(curah_hujan[i].curah_hujan_normal)
+                    if(Number(ch_this)<min || Number(ch_this)>max){
+                        found=false
+                        break
                     }
-                    count_curah_hujan++
+                    if(ch_ignore.includes(idx)){
+                        found=false
+                        break
+                    }
                 }
             }
 
-            return {
-                curah_hujan:ch!=""?ceil(ch/count_curah_hujan):ch,
-                curah_hujan_normal:ch!=""?(curah_hujan_normal/count_curah_hujan):curah_hujan_normal
+            if(found){
+                ch_ignore=ch_ignore.concat([
+                    idx, idx+1, idx+2, idx+3, idx+4, idx+5, idx+6, idx+7, idx+8
+                ])
+                ch_data=ch_data.concat([
+                    {
+                        text:arrayMonths[ch.bulan-1]+" "+ch.input_ke+" - "+arrayMonths[ch_raw[idx+8].bulan-1]+" "+ch_raw[idx+8].input_ke,
+                        data:[ch, ch_raw[idx+1], ch_raw[idx+2], ch_raw[idx+3], ch_raw[idx+4], ch_raw[idx+5], ch_raw[idx+6], ch_raw[idx+7], ch_raw[idx+8]]
+                    }
+                ])
             }
-        }
-    }
-    const blockColor=(curah_hujan, normal)=>{
-        const value=curah_hujan.toString().trim()!=""?Number(curah_hujan):""
+        })
 
-        if(value==""){
+        return ch_data
+    }
+    const blockColor=(jadwal_tanam)=>{
+        if(jadwal_tanam.length>0){
             return "#238c3f"
         }
-        
-        if(value<=150){
-            return "#238c3f"
-        }
-        else if(value>150 && value<=200){
-            return "#8c5f23"
-        }
-        else if(value>200){
-            return "#8c2323"
-        }
-    }
-    const sifatHujan=(curah_hujan, normal)=>{
-        if(curah_hujan.toString().trim()==""||normal.toString().trim()==""){
-            return ""
-        }
-        if(Number(normal)==0){
-            return "?"
-        }
-
-        const value=curah_hujan/normal;
-        if(value<=0.3){
-            return "<div class='d-flex'><div class='d-flex mx-1' style='width:25px;height:15px;background:#4a1400'></div> (0 - 30%) Bawah Normal</div>";
-        }
-        if(value<=0.5){
-            return "<div class='d-flex'><div class='d-flex mx-1' style='width:25px;height:15px;background:#a65900'></div> (31 - 50%) Bawah Normal</div>";
-        }
-        if(value<=0.84){
-            return "<div class='d-flex'><div class='d-flex mx-1' style='width:25px;height:15px;background:#f3c40f'></div> (51 - 84%) Bawah Normal</div>";
-        }
-        if(value<=1.15){
-            return "<div class='d-flex'><div class='d-flex mx-1' style='width:25px;height:15px;background:#fefe00'></div> (85 - 115%) Normal</div>";
-        }
-        if(value<=1.5){
-            return "<div class='d-flex'><div class='d-flex mx-1' style='width:25px;height:15px;background:#89b700'></div> (116 - 150%) Atas Normal</div>";
-        }
-        if(value<=2){
-            return "<div class='d-flex'><div class='d-flex mx-1' style='width:25px;height:15px;background:#238129'></div> (151 - 200%) Atas Normal</div>";
-        }
-        if(value>2){
-            return "<div class='d-flex'><div class='d-flex mx-1' style='width:25px;height:15px;background:#00460e'></div> (> 200%) Atas Normal</div>";
-        }
-    }
-    const sifatBulan=(curah_hujan)=>{
-        if(curah_hujan.toString().trim()==""){
-            return ""
-        }
-
-        if(curah_hujan>200){
-            return "Bulan Basah"
-        }
-        else if(curah_hujan>=100 && curah_hujan<=200){
-            return "Bulan Lembab"
-        }
-        else if(curah_hujan>=60 && curah_hujan<100){
-            return "Bulan Kering"
-        }
-        else if(curah_hujan<60){
-            return "Bulan Sangat Kering"
-        }
+        return "#8c2323"
     }
 
     
 
     //value
-    const valueBanjir=(str_value)=>{
-        const value=str_value.toString().trim()!=""?Number(str_value):""
-        
-        if(value=="") return ""
+    const tahun_options=()=>{
+        const year=(new Date()).getFullYear()
 
-        if(value<=150){
-            return "Aman"
+        let years=[]
+        for(var i=year-2; i<=year+2; i++){
+            years=years.concat([{value:i, label:i}])
         }
-        else if(value>150 && value<=200){
-            return "Waspada"
-        }
-        else if(value>200){
-            return "Rawan"
-        }
+
+        return [{value:"", label:"Pilih Tahun"}].concat(years)
     }
     const month=[
-        {label:"Rata-rata per tahun", value:""},
         {label:"Januari 1", value:"1_1"},
         {label:"Januari 2", value:"1_2"},
         {label:"Januari 3", value:"1_3"},
@@ -204,16 +162,6 @@ const MapWindy=(props)=>{
         {label:"Desember 2", value:"12_2"},
         {label:"Desember 3", value:"12_3"}
     ]
-    const tahun_options=()=>{
-        const year=(new Date()).getFullYear()
-
-        let years=[]
-        for(var i=year-2; i<=year+2; i++){
-            years=years.concat([{value:i, label:i}])
-        }
-
-        return [{value:"", label:"Pilih Tahun"}].concat(years)
-    }
 
     //actions
 
@@ -233,39 +181,26 @@ const MapWindy=(props)=>{
                             <Typeahead
                                 id="rendering-example"
                                 labelKey="region"
-                                options={props.search_data}
+                                options={props.kabupaten_kota}
                                 placeholder="Cari Wilayah ..."
                                 maxResults={10}
                                 onChange={e=>{
                                     if(e.length>0){
                                         if(mapRef.current.leafletElement==null) return
 
-                                        mapRef.current.leafletElement.setView([e[0].center.latitude, e[0].center.longitude], e[0].center.zoom)
+                                        mapRef.current.leafletElement.setView([e[0].geo_json.map_center.latitude, e[0].geo_json.map_center.longitude], e[0].geo_json.map_center.zoom)
                                         setCenter({
-                                            latitude:e[0].center.latitude,
-                                            longitude:e[0].center.longitude,
-                                            zoom:e[0].center.zoom
+                                            latitude:e[0].geo_json.map_center.latitude,
+                                            longitude:e[0].geo_json.map_center.longitude,
+                                            zoom:e[0].geo_json.map_center.zoom
                                         })
+                                        props.typeRegency(e[0].id_region)
                                     }
                                 }}
                                 renderMenuItemChildren={(option, {text})=>{
                                     return (
                                         <>
                                             <Highlighter search={text} highlightClassName="pe-0">{option.region}</Highlighter>
-                                            <div className="text-muted">
-                                                <small>
-                                                    {option.type=="kabupaten_kota"?
-                                                        <>
-                                                            {option.provinsi}
-                                                        </>
-                                                    :
-                                                        <>
-                                                            {option.kabupaten_kota}, {' '}
-                                                            {option.provinsi}
-                                                        </>
-                                                    }
-                                                </small>
-                                            </div>
                                         </>
                                     )
                                 }}
@@ -274,6 +209,23 @@ const MapWindy=(props)=>{
                         </div>
                     </div>
                     <div className="d-flex">
+                        <div style={{minWidth:"120px"}}>
+                            <div style={{minWidth:"120px"}}>
+                                <Select
+                                    options={month}
+                                    styles={{
+                                        container:(baseStyles, state)=>({
+                                            ...baseStyles,
+                                            zIndex:99999999999
+                                        })
+                                    }}
+                                    value={month.find(f=>f.value==bulan)}
+                                    onChange={e=>this.typeBulan(e.value)}
+                                    placeholder="Pilih Bulan"
+                                    isSearchable
+                                />
+                            </div>
+                        </div>
                         <div style={{minWidth:"120px"}}>
                             <CreatableSelect
                                 options={tahun_options()}
@@ -286,21 +238,6 @@ const MapWindy=(props)=>{
                                         zIndex:99999999999
                                     })
                                 }}
-                            />
-                        </div>
-                        <div className="ms-2" style={{minWidth:"200px"}}>
-                            <Select
-                                options={month}
-                                styles={{
-                                    container:(baseStyles, state)=>({
-                                        ...baseStyles,
-                                        zIndex:99999999999
-                                    })
-                                }}
-                                value={month.find(f=>f.value==bulan)}
-                                onChange={e=>setBulan(e.value)}
-                                placeholder="Pilih Bulan"
-                                isSearchable
                             />
                         </div>
                     </div>
@@ -340,27 +277,21 @@ const MapWindy=(props)=>{
                                                     />
                                                 </BaseLayer>
                                             </LayersControl>
-                                            {props.data.map(df=>{
-                                                const curah_hujan=curahHujan(df)
-
+                                            {map_data().map(df=>{
                                                 return (
                                                     <GeoJSON
                                                         key={Date.now()+Math.random()+"-"+df.properties.region}
                                                         data={df}
                                                         style={mapStyle(df)}
                                                     >
-                                                        <Tooltip direction="center" className="d-flex flex-column align-items-center tooltip-region" style={{fontFamily:"Poppins"}} permanent>
-                                                            {(center.zoom>=9)&&<>{df.properties.region}</>}
-                                                            {valueBanjir(curah_hujan.curah_hujan)=="Rawan"&&<span className="blink-animation text-white fs-18px"><FiAlertTriangle/></span>}
-                                                        </Tooltip>
                                                         <Popup>
                                                             <div class='d-flex flex-column'>
-                                                                <span>Kabupaten/Kota : <strong>{df.properties.region}</strong></span>
-                                                                <span>Curah Hujan : <strong>{curah_hujan.curah_hujan}</strong></span>
-                                                                <span>Curah Hujan Normal : <strong>{curah_hujan.curah_hujan_normal}</strong></span>
-                                                                <span class='d-flex'>Sifat Hujan : <strong dangerouslySetInnerHTML={{__html:sifatHujan(curah_hujan.curah_hujan, curah_hujan.curah_hujan_normal)}}></strong></span>
-                                                                <span class='d-flex'>Sifat Bulan : <strong>{sifatBulan(curah_hujan.curah_hujan)}</strong></span>
-                                                                <span class='d-flex'>Banjir : <strong>{valueBanjir(curah_hujan.curah_hujan)}</strong></span>
+                                                                <span>Kecamatan : <strong>{df.properties.region}</strong></span>
+                                                                <span>
+                                                                    Jadwal Tanam :&nbsp;
+                                                                    {_.pluck(df.properties.jadwal_tanam, 'text').join(", ")}
+                                                                    {df.properties.jadwal_tanam.length==0&&<>-</>}
+                                                                </span>
                                                             </div>
                                                         </Popup>
                                                     </GeoJSON>
@@ -370,6 +301,7 @@ const MapWindy=(props)=>{
                                     }
                                 />
                             </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -390,15 +322,11 @@ const MapWindy=(props)=>{
                     <table class='mt-3'>
                         <tr>
                             <td><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#238c3f"}}></div></div></td>
-                            <th> <span class='ms-2'>Aman</span></th>
-                        </tr>
-                        <tr style={{borderTop:"1px solid #9a9a9a"}}>
-                            <td class='pt-1'><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#8c5f23"}}></div></div></td>
-                            <th> <span class='ms-2'>Waspada</span></th>
+                            <th> <span class='ms-2'>Bisa Ditanam</span></th>
                         </tr>
                         <tr style={{borderTop:"1px solid #9a9a9a"}}>
                             <td class='pt-1'><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#8c2323"}}></div></div></td>
-                            <th> <span class='ms-2'>Rawan</span></th>
+                            <th> <span class='ms-2'>Tidak Bisa Ditanam</span></th>
                         </tr>
                     </table>
                 </div>

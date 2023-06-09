@@ -6,6 +6,7 @@
 
         {!!\App\Library\HeadLibrary::render()!!}
 
+        <link rel="manifest" href="/manifest.json" />
         <!-- Fonts -->
         <link
             href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
@@ -55,16 +56,22 @@
                                   <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="ms-1" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item fs-14px" href="peringatan_dini/banjir">Banjir</a>
+                                    <a class="dropdown-item fs-14px" href="/peringatan_dini/banjir">Banjir</a>
                                     <a class="dropdown-item fs-14px" href="/peringatan_dini/kekeringan">Kekeringan</a>
                                     <a class="dropdown-item fs-14px" href="#">Sebaran OPT</a>
                                 </div>
                             </li>
-                            {{-- <li class="nav-item">
-                                <a class="nav-link link-dark fs-15px fw-medium" href="#">Opt Utama</a>
-                            </li> --}}
-                            <li class="nav-item">
-                                <a class="nav-link link-dark fs-15px fw-medium" href="/jadwal_tanam">Jadwal Tanam</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link link-dark fs-15px fw-medium dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  Jadwal Tanam
+                                  <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="ms-1" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item fs-14px" href="/jadwal_tanam">Jadwal Tanam Tabular</a>
+                                    <a class="dropdown-item fs-14px" href="/jadwal_tanam/cabai_besar">Peta Cabai Besar</a>
+                                    <a class="dropdown-item fs-14px" href="/jadwal_tanam/cabai_rawit">Peta Cabai Rawit</a>
+                                    <a class="dropdown-item fs-14px" href="/jadwal_tanam/bawang_merah">Peta Bawang Merah</a>
+                                </div>
                             </li>
                         </ul>
                     </div>

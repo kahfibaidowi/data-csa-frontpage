@@ -8,9 +8,10 @@ import { Head } from "@inertiajs/react"
 import { toast, ToastContainer } from "react-toastify"
 import { FiBarChart2, FiChevronDown, FiCloudRain, FiHome, FiMenu, FiWind } from "react-icons/fi"
 import * as turf from '@turf/turf'
-import { centroid } from "@/Config/helpers"
+import { centroid, ceil } from "@/Config/helpers"
 import { Collapse, Offcanvas } from "react-bootstrap"
 import classNames from "classnames"
+import MenuSidebar from "@/Components/menu_sidebar"
 
 
 
@@ -116,7 +117,11 @@ class Frontpage extends React.Component{
                     }
                 })
 
-                const curah_hujan_kabkota=this.valueKabupatenKotaCurahHujan({kecamatan})
+                const curah_hujan_kabkota=this.valueKabupatenKotaCurahHujan({kecamatan}).map(ch=>{
+                    return Object.assign({}, ch, {
+                        curah_hujan:ceil(ch.curah_hujan)
+                    })
+                })
 
                 return {
                     type:"Feature",
@@ -297,89 +302,13 @@ class Frontpage extends React.Component{
                     tahun={tahun}
                 />
 
-                <Offcanvas show={show_menu} placement="start" onHide={()=>this.setShowMenu(false)}>
-                    <Offcanvas.Header>
-                        <Offcanvas.Title>
-                            <a href="/" className="navbar-brand me-auto ms-3 ms-lg-0">
-                                {this.props.pengaturan.logo!=""?
-                                    <img src={BASE_URL+"/storage/"+this.props.pengaturan.logo} style={{maxHeight:"20px"}}/>
-                                :
-                                    <span className="text-success">{this.props.pengaturan.title}</span>
-                                }
-                                
-                            </a>
-                        </Offcanvas.Title>
-                        <button 
-                            type="button" 
-                            class="btn-close" 
-                            aria-label="Close" 
-                            style={{fontSize:"20px"}}
-                            onClick={()=>this.setShowMenu(false)}
-                        ></button>
-                    </Offcanvas.Header>
-                    <Offcanvas.Body className="sidebar">
-                        <div className="sidebar-body">
-                            <ul class="nav p-2">
-                                {/* <li class="nav-item nav-category">Main</li> */}
-                                <li class="nav-item">
-                                    <a href="/" class="nav-link">
-                                        <FiHome className="link-icon"/>
-                                        <span class="link-title">Dashboard</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="/info_grafis" class="nav-link">
-                                        <FiBarChart2 className="link-icon"/>
-                                        <span class="link-title">Infografis</span>
-                                    </a>
-                                </li>
-                                <li 
-                                    className={classNames(
-                                        "nav-item",
-                                        "active"
-                                    )}
-                                >
-                                    <a 
-                                        className="nav-link cursor-pointer" 
-                                        onClick={e=>this.setCollapse(collapse=="peringatan_dini"?"":"peringatan_dini")} 
-                                        aria-expanded={collapse=="peringatan_dini"}
-                                    >
-                                        <FiCloudRain className="link-icon"/>
-                                        <span className="link-title">Peringatan Dini</span>
-                                        <FiChevronDown className="link-arrow"/>
-                                    </a>
-                                    <Collapse in={collapse=="peringatan_dini"}>
-                                        <div>
-                                            <ul className="nav sub-menu">
-                                                <li className="nav-item">
-                                                    <a href="/peringatan_dini/banjir" className={classNames("nav-link")}>
-                                                        Banjir
-                                                    </a>
-                                                </li>
-                                                <li className="nav-item">
-                                                    <a href="/peringatan_dini/kekeringan" className={classNames("nav-link", "active")}>
-                                                        Kekeringan
-                                                    </a>
-                                                </li>
-                                                <li className="nav-item">
-                                                    <a href="#" className={classNames("nav-link")}>
-                                                        Sebaran OPT
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </Collapse>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="/jadwal_tanam" class="nav-link">
-                                        <FiWind className="link-icon"/>
-                                        <span class="link-title">Jadwal Tanam</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </Offcanvas.Body>
-                </Offcanvas>
+                <MenuSidebar
+                    show_menu={show_menu}
+                    setShowMenu={this.setShowMenu}
+                    pengaturan={this.props.pengaturan}
+                    setCollapse={this.setCollapse}
+                    collapse={collapse}
+                />
 
                 <ToastContainer
                     position="top-center"

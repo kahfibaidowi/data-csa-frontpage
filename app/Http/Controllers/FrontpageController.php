@@ -12,6 +12,7 @@ use App\Models\SebaranOptModel;
 
 class FrontpageController extends Controller
 {
+
     public function index(){
         //--headline
         $headline=FrontpageModel::where("type", "headline_carousel")->first();
@@ -102,6 +103,22 @@ class FrontpageController extends Controller
         ]);
     }
 
+    public function peta_sebaran_opt()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Sebaran OPT - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('PetaSebaranOpt', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+
     public function peringatan_dini()
     {
         $pengaturan=$this->data_pengaturan();
@@ -161,6 +178,54 @@ class FrontpageController extends Controller
 
         //--render
         return Inertia::render('JadwalTanam', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+
+    public function peta_jadwal_tanam_cabai_rawit()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Peta Jadwal Tanam Cabai Rawit - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('PetaJadwalTanamCabaiRawit', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+    
+    public function peta_jadwal_tanam_cabai_besar()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Peta Jadwal Tanam Cabai Besar - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('PetaJadwalTanamCabaiBesar', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+    
+    public function peta_jadwal_tanam_bawang_merah()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Peta Jadwal Tanam Bawang Merah - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('PetaJadwalTanamBawangMerah', [
             'footer'        =>$footer,
             'pengaturan'    =>$pengaturan
         ]);
@@ -267,6 +332,13 @@ class FrontpageController extends Controller
         ]);
     }
 
+    public function test_map()
+    {
+        return Inertia::render('TestMap', [
+            'data'  =>"xkdf"
+        ]);
+    }
+
     private function data_pengaturan()
     {
         //--pengaturan
@@ -331,4 +403,5 @@ class FrontpageController extends Controller
             'partner'=>$partner
         ];
     }
+
 }

@@ -184,9 +184,9 @@ thead.no-display{
 }
 
 /* CAROUSEL */
-#carousel .carousel-item{
+/* #carousel .carousel-item{
     height: 28rem;
-}
+} */
 #carousel .carousel-caption{
     margin-right:auto;
     margin-left:auto;

@@ -10,6 +10,7 @@ import * as turf from '@turf/turf'
 import AsyncSelect from 'react-select/async'
 import { AsyncTypeahead, Highlighter, Typeahead } from "react-bootstrap-typeahead"
 import classNames from "classnames"
+import { ceil } from "@/Config/helpers"
 
 
 const { BaseLayer, Overlay } = LayersControl;
@@ -75,7 +76,7 @@ const MapWindy=(props)=>{
             }
 
             return {
-                curah_hujan:ch!=""?(ch/count_curah_hujan):ch,
+                curah_hujan:ch!=""?ceil(ch/count_curah_hujan):ch,
                 curah_hujan_normal:ch!=""?(curah_hujan_normal/count_curah_hujan):curah_hujan_normal
             }
         }
