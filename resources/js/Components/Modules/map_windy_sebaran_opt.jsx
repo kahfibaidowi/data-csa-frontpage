@@ -182,7 +182,7 @@ const MapWindy=(props)=>{
                                                     />
                                                 </BaseLayer>
                                             </LayersControl>
-                                            {props.data.slice(0, 20).map(df=>{
+                                            {props.data.map(df=>{
                                                 return (
                                                     <GeoJSON
                                                         key={Date.now()+Math.random()+"-"+df.properties.region}
