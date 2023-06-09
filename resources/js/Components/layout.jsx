@@ -28,9 +28,16 @@ export const Layout=({children, withFooter=true, pengaturan, footer})=>{
                                 <li class="nav-item">
                                     <a class="nav-link link-dark fs-15px fw-medium" href="/">Dashboard</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link link-dark fs-15px fw-medium" href="/sebaran_opt">Sebaran OPT</a>
-                                </li>
+                                <Dropdown>
+                                    <Dropdown.Toggle className='nav-link link-dark fs-15px fw-medium' as="a" href="#">
+                                        Sebaran OPT
+                                        <FiChevronDown className='ms-1'/>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <NavDropdown.Item className='fs-14px' href="/sebaran_opt">Data Sebaran</NavDropdown.Item>
+                                        <NavDropdown.Item className='fs-14px' href="/sebaran_opt/peta">Peta Sebaran</NavDropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                                 <li class="nav-item">
                                     <a class="nav-link link-dark fs-15px fw-medium" href="/info_grafis">Infografis</a>
                                 </li>

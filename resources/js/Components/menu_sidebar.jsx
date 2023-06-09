@@ -35,11 +35,37 @@ const MenuSidebar=(props)=>{
                                 <span class="link-title">Dashboard</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="/sebaran_opt" class="nav-link">
+                        <li 
+                            className={classNames(
+                                "nav-item",
+                                {"active":props.collapse=="sebaran_opt"}
+                            )}
+                        >
+                            <a 
+                                className="nav-link cursor-pointer" 
+                                onClick={e=>props.setCollapse(props.collapse=="sebaran_opt"?"":"sebaran_opt")} 
+                                aria-expanded={props.collapse=="sebaran_opt"}
+                            >
                                 <FiCloudSnow className="link-icon"/>
-                                <span class="link-title">Sebaran OPT</span>
+                                <span className="link-title">Sebaran OPT</span>
+                                <FiChevronDown className="link-arrow"/>
                             </a>
+                            <Collapse in={props.collapse=="sebaran_opt"}>
+                                <div>
+                                    <ul className="nav sub-menu">
+                                        <li className="nav-item">
+                                            <a href="/sebaran_opt" className={classNames("nav-link")}>
+                                                Data Sebaran
+                                            </a>
+                                        </li>
+                                        <li className="nav-item">
+                                            <a href="/sebaran_opt/peta" className={classNames("nav-link")}>
+                                                Peta Sebaran
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </Collapse>
                         </li>
                         <li class="nav-item">
                             <a href="/info_grafis" class="nav-link">
