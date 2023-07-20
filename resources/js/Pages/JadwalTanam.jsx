@@ -11,6 +11,7 @@ import { Modal, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { isUndefined } from '@/Config/config';
 import { arrayMonths, ceil } from '@/Config/helpers';
 import AnimateLineChart from '@/Components/Modules/animate_line_chart';
+import { ToastApp } from '@/Components/toast';
 
 export default class JadwalTanam extends React.Component{
     state={
@@ -196,6 +197,8 @@ export default class JadwalTanam extends React.Component{
                     data={detail_curah_hujan}
                     hideModal={this.toggleDetail}
                 />
+
+                <ToastApp/>
             </>
         );
     }
@@ -319,7 +322,7 @@ const Table=({data, typeFilter, setPerPage, goToPage, toggleDetail})=>{
 
 const ModalDetail=({data, hideModal})=>{
     const [tab_open, setTabOpen]=useState("cabai-besar")
-    const ch_toleransi=20
+    const ch_toleransi=0
 
     useEffect(()=>{
         if(data.is_open==true){
@@ -448,7 +451,7 @@ const ModalDetail=({data, hideModal})=>{
     const jadwal_tanam_bawang_merah=()=>{
         let ch_ignore=[]
         let ch_data=[]
-        let min=30-ch_toleransi
+        let min=80-ch_toleransi
         let max=200+ch_toleransi
         let ch_raw=curah_hujan()
 

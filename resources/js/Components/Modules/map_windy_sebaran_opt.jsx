@@ -78,7 +78,7 @@ const MapWindy=(props)=>{
         <>
             <nav class="navbar bg-white" style={{left:0, top:0, width:"100%", zIndex:999, height:"auto", border:"0", position:"relative"}}>
                 <div class="container-fluid" style={{minHeight:"50px"}}>
-                    <div className="d-flex">
+                    <div className="d-flex align-items-center">
                         <button 
                             class="btn btn-link link-dark p-0 px-1 fs-3" 
                             type="button"
@@ -86,6 +86,9 @@ const MapWindy=(props)=>{
                         >
                             <FiMenu/>
                         </button>
+                        <h4 className="ms-3 mb-0 d-none d-md-inline fs-5 fw-semibold">Peta Sebaran OPT</h4>
+                    </div>
+                    <div className="d-flex">
                         <div class="ms-3" style={{minWidth:"250px"}}>
                             <Typeahead
                                 id="rendering-example"
@@ -115,9 +118,7 @@ const MapWindy=(props)=>{
                                 
                             />
                         </div>
-                    </div>
-                    <div className="d-flex">
-                        <div style={{minWidth:"120px"}}>
+                        <div className="ms-2" style={{minWidth:"120px"}}>
                             <CreatableSelect
                                 options={tahun_options()}
                                 onChange={e=>props.typeTahun(e)}

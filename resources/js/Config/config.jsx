@@ -4,7 +4,10 @@ import { useCallback, useRef, useState, useEffect } from "react";
 //url
 export const BASE_URL=process.env.NODE_ENV==="development"?
     "http://localhost/data-csa/public":
-    "https://ews.tifpsdku.com/api";
+    "https://ewssipantara.id/api";
+// export const BASE_URL=process.env.NODE_ENV==="development"?
+//     "https://ews.garapan.id/api":
+//     "https://ews.garapan.id/api";
 
 //windy
 export const WINDY_KEY="HvSDfrRvwQCr6g4WSF5WFBh3zlvWajN8"

@@ -20,7 +20,7 @@ export const Layout=({children, withFooter=true, pengaturan, footer})=>{
                             }
                             
                         </a>
-                        <a href={"https://ews.tifpsdku.com/dashboard/login"} className="btn btn-success rounded-pill order-lg-1">
+                        <a href={"https://ewssipantara.id/dashboard/login"} className="btn btn-success rounded-pill order-lg-1">
                             Login Admin
                         </a>
                         <Navbar.Collapse id="nav-collapse">

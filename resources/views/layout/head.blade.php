@@ -36,7 +36,7 @@
                             <span class="text-success">{{$pengaturan['title']}}</span>
                         @endif
                     </a>
-                    <a href="https://ews.tifpsdku.com/dashboard/login" class="btn btn-success rounded-pill order-lg-1">
+                    <a href="https://ewssipantara.id/dashboard/login" class="btn btn-success rounded-pill order-lg-1">
                         Login Admin
                     </a>
                     <div class="collapse navbar-collapse" id="nav-collapse">

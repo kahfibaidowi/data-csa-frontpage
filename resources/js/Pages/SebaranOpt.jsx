@@ -18,6 +18,7 @@ import DataGrid from "react-data-grid"
 import * as _ from "underscore"
 import ReactApexChart from "react-apexcharts"
 import BarChart from "@/Components/Modules/bar_chart"
+import { ToastApp } from "@/Components/toast"
 
 
 
@@ -194,6 +195,8 @@ class Frontpage extends React.Component{
                         </div>
                     </div>
                 </Layout>
+
+                <ToastApp/>
             </>
         )
     }

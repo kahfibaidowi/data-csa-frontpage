@@ -13,6 +13,7 @@ import { FiMenu } from "react-icons/fi"
 import Select from "react-select"
 import CreatableSelect from "react-select/creatable"
 import MenuSidebar from "@/Components/menu_sidebar"
+import { ToastApp } from "@/Components/toast"
 
 
 class Frontpage extends React.Component{
@@ -130,7 +131,7 @@ class Frontpage extends React.Component{
         }
 
         //geojson vt
-        let ch_toleransi=20
+        let ch_toleransi=0
         let min=85-ch_toleransi
         let max=250+ch_toleransi
 
@@ -287,7 +288,7 @@ class Frontpage extends React.Component{
             <>
                 <nav class="navbar bg-white" style={{left:0, top:0, width:"100%", zIndex:1001, height:"auto", border:"0", position:"relative"}}>
                     <div class="container-fluid" style={{minHeight:"50px"}}>
-                        <div className="d-flex">
+                        <div className="d-flex align-items-center">
                             <button 
                                 class="btn btn-link link-dark p-0 px-1 fs-3" 
                                 type="button"
@@ -295,6 +296,7 @@ class Frontpage extends React.Component{
                             >
                                 <FiMenu/>
                             </button>
+                            <h4 className="ms-3 mb-0 d-none d-md-inline fs-5 fw-semibold">Jadwal Tanam Optimal Cabai Rawit</h4>
                         </div>
                         <div className="d-flex">
                             <div style={{minWidth:"120px"}}>
@@ -346,11 +348,11 @@ class Frontpage extends React.Component{
                         <table class='mt-3'>
                             <tr>
                                 <td><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#238c3f"}}></div></div></td>
-                                <th> <span class='ms-2'>Bisa Ditanam</span></th>
+                                <th> <span class='ms-2'>Potensi Tanam</span></th>
                             </tr>
                             <tr style={{borderTop:"1px solid #9a9a9a"}}>
                                 <td class='pt-1'><div class='d-flex'><div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#8c2323"}}></div></div></td>
-                                <th> <span class='ms-2'>Tidak Bisa Ditanam</span></th>
+                                <th> <span class='ms-2'>Tidak Potensi Tanam</span></th>
                             </tr>
                         </table>
                     </div>
@@ -363,6 +365,8 @@ class Frontpage extends React.Component{
                     setCollapse={this.setCollapse}
                     collapse={collapse}
                 />
+
+                <ToastApp/>
             </>
         )
     }

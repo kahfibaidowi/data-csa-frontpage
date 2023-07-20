@@ -12,6 +12,7 @@ import { centroid, ceil } from "@/Config/helpers"
 import { Collapse, Offcanvas } from "react-bootstrap"
 import classNames from "classnames"
 import MenuSidebar from "@/Components/menu_sidebar"
+import { ToastApp } from "@/Components/toast"
 
 
 
@@ -166,20 +167,7 @@ class Frontpage extends React.Component{
                     collapse={collapse}
                 />
 
-                <ToastContainer
-                    position="top-center"
-                    autoClose={2000}
-                    hideProgressBar
-                    newestOnTop={false}
-                    closeButton={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss={false}
-                    draggable
-                    pauseOnHover
-                    theme="colored"
-                    limit={1}
-                />
+                <ToastApp/>
             </>
         )
     }

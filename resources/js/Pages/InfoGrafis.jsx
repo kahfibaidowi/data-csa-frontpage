@@ -16,6 +16,7 @@ import CreatableSelect from "react-select/creatable"
 import NumberFormat from "react-number-format"
 import DataGrid from "react-data-grid"
 import * as _ from "underscore"
+import { ToastApp } from "@/Components/toast"
 
 
 
@@ -202,6 +203,8 @@ class Frontpage extends React.Component{
                         </div>
                     </div>
                 </Layout>
+                
+                <ToastApp/>
             </>
         )
     }
