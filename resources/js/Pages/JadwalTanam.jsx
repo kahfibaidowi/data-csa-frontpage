@@ -609,7 +609,7 @@ const ModalDetail=({data, hideModal})=>{
                         </div>
                     </Tab>
                     <Tab eventKey="bawang-merah" title="Bawang Merah">
-                        <p>Curah hujan optimal untuk bawang merah adalah <strong>30-200mm/bulan</strong></p>
+                        <p>Curah hujan optimal untuk bawang merah adalah <strong>80-200mm/bulan</strong></p>
                         <div className="table-responsive mt-3">
                             <table className="table table-hover table-hover table-custom table-wrap mb-0">
                                 <thead className="thead-light">

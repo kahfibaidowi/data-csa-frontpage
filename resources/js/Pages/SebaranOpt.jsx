@@ -7,7 +7,7 @@ import MapWindy from "@/Components/Modules/map_windy"
 import { BASE_URL, isUndefined } from "@/Config/config"
 import { Head } from "@inertiajs/react"
 import { toast, ToastContainer } from "react-toastify"
-import { FiChevronDown, FiChevronLeft, FiChevronRight, FiCloudRain, FiHome, FiMenu, FiWind } from "react-icons/fi"
+import { FiChevronDown, FiChevronLeft, FiChevronRight, FiCloudRain, FiFilter, FiHome, FiMenu, FiWind } from "react-icons/fi"
 import * as turf from '@turf/turf'
 import { arrayMonths, centroid, paginate } from "@/Config/helpers"
 import { Collapse, Modal, Offcanvas, Spinner } from "react-bootstrap"
@@ -158,6 +158,13 @@ class Frontpage extends React.Component{
     }
     timeout=0
 
+    //FILTER
+    setFilterMobileOpen=(open=false)=>{
+        this.setState({
+            filter_mobile_open:open
+        })
+    }
+
     render(){
         const {sebaran_opt, region}=this.state
 
@@ -204,6 +211,8 @@ class Frontpage extends React.Component{
 
 
 const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
+    //state
+    const [mobile_show, setMobileShow]=useState(false)
 
     //filter
     const data_komoditas=[
@@ -248,6 +257,17 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
             }
         }))
     }
+    const totalFilter=()=>{
+        let total=0
+
+        if(data.province_id!="") total++
+        if(data.regency_id!="") total++
+        if(data.komoditas!="") total++
+        if(data.tahun!="") total++
+        if(data.bulan!="") total++
+
+        return total
+    }
 
     return (
         <>
@@ -255,11 +275,11 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                 <div className="col-12">
                     <div className="card mb-4">
                         <div className="card-body p-4">
-                            <div className="d-flex mb-3 mt-3">
+                            <div className="d-none d-md-flex mb-3 mt-3">
                                 <div style={{width:"200px"}} className="me-2">
                                     <Select
                                         options={data_provinsi()}
-                                        value={data_provinsi().find(f=>f.value==data.provinsi)}
+                                        value={data_provinsi().find(f=>f.value==data.province_id)}
                                         onChange={e=>{
                                             typeFilter({target:{name:"province_id", value:e.value}})
                                         }}
@@ -269,7 +289,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                 <div style={{width:"200px"}} className="me-2">
                                     <Select
                                         options={data_kab_kota()}
-                                        value={data_kab_kota().find(f=>f.value==data.kab_kota)}
+                                        value={data_kab_kota().find(f=>f.value==data.regency_id)}
                                         onChange={e=>{
                                             typeFilter({target:{name:"regency_id", value:e.value}})
                                         }}
@@ -306,6 +326,16 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                         placeholder="Semua Bulan"
                                     />
                                 </div>
+                            </div>
+                            <div className="d-flex d-md-none justify-content-end mb-4">
+                                <button
+                                    type="button" 
+                                    className="btn btn-secondary btn-icon-text"
+                                    onClick={e=>setMobileShow(true)}
+                                >
+                                    <FiFilter className="btn-icon-prepend"/>
+                                    Filter {totalFilter()>0&&<>({totalFilter()})</>}
+                                </button>
                             </div>
                             <div className="table-responsive">
                                 <table className="table table-hover table-hover table-custom table-wrap mb-0">
@@ -414,6 +444,67 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                     </div>
                 </div>
             </div>
+
+            {/* FILTER MOBILE */}
+            <Offcanvas show={mobile_show} onHide={()=>setMobileShow(false)} placement="end">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Filter</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    <div className="d-flex flex-column mb-3 mt-3">
+                        <div className="mb-2">
+                            <Select
+                                options={data_provinsi()}
+                                value={data_provinsi().find(f=>f.value==data.province_id)}
+                                onChange={e=>{
+                                    typeFilter({target:{name:"province_id", value:e.value}})
+                                }}
+                                placeholder="Semua Provinsi"
+                            />
+                        </div>
+                        <div className="mb-2">
+                            <Select
+                                options={data_kab_kota()}
+                                value={data_kab_kota().find(f=>f.value==data.regency_id)}
+                                onChange={e=>{
+                                    typeFilter({target:{name:"regency_id", value:e.value}})
+                                }}
+                                placeholder="Semua Kabupaten/Kota"
+                            />
+                        </div>
+                        <div className="mb-2">
+                            <Select
+                                options={data_komoditas}
+                                value={data_komoditas.find(f=>f.value==data.komoditas)}
+                                onChange={e=>{
+                                    typeFilter({target:{name:"komoditas", value:e.value}})
+                                }}
+                                placeholder="Semua Komoditas"
+                            />
+                        </div>
+                        <div className="mb-2">
+                            <Select
+                                options={data_tahun}
+                                value={data_tahun.find(f=>f.value==data.tahun)}
+                                onChange={e=>{
+                                    typeFilter({target:{name:"tahun", value:e.value}})
+                                }}
+                                placeholder="Semua Tahun"
+                            />
+                        </div>
+                        <div className="mb-2">
+                            <Select
+                                options={data_bulan()}
+                                value={data_bulan().find(f=>f.value==data.bulan)}
+                                onChange={e=>{
+                                    typeFilter({target:{name:"bulan", value:e.value}})
+                                }}
+                                placeholder="Semua Bulan"
+                            />
+                        </div>
+                    </div>
+                </Offcanvas.Body>
+            </Offcanvas>
         </>
     )
 }

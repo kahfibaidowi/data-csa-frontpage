@@ -9,11 +9,12 @@ import { isUndefined } from "@/Config/config"
 import { ceil } from "@/Config/helpers"
 import { MapContainer, TileLayer } from "react-leaflet"
 import { useEffect } from "react"
-import { FiMenu } from "react-icons/fi"
+import { FiFilter, FiMenu } from "react-icons/fi"
 import Select from "react-select"
 import CreatableSelect from "react-select/creatable"
 import MenuSidebar from "@/Components/menu_sidebar"
 import { ToastApp } from "@/Components/toast"
+import { Offcanvas } from "react-bootstrap"
 
 
 class Frontpage extends React.Component{
@@ -25,7 +26,8 @@ class Frontpage extends React.Component{
         map:null,
         position:[-1.973, 116.253],
         kecamatan:[],
-        is_loading:false
+        is_loading:false,
+        mobile_show:false
     }
 
     componentDidMount=async()=>{
@@ -280,6 +282,9 @@ class Frontpage extends React.Component{
             collapse:collapse
         })
     }
+    setMobileShow=(show=false)=>{
+        this.setState({mobile_show:show})
+    }
     
     render(){
         const {tahun, bulan, show_menu, collapse}=this.state
@@ -298,7 +303,16 @@ class Frontpage extends React.Component{
                             </button>
                             <h4 className="ms-3 mb-0 d-none d-md-inline fs-5 fw-semibold">Jadwal Tanam Optimal Cabai Besar</h4>
                         </div>
-                        <div className="d-flex">
+                        <div className="d-flex d-md-none">
+                            <button
+                                type="button" 
+                                className="btn btn-secondary btn-icon"
+                                onClick={e=>this.setMobileShow(true)}
+                            >
+                                <FiFilter/>
+                            </button>
+                        </div>
+                        <div className="d-none d-md-flex">
                             <div style={{minWidth:"120px"}}>
                                 <Select
                                     options={this.month}
@@ -367,6 +381,46 @@ class Frontpage extends React.Component{
                 />
 
                 <ToastApp/>
+
+                {/* FILTER MOBILE */}
+                <Offcanvas show={this.state.mobile_show} onHide={()=>this.setMobileShow(false)} placement="end">
+                    <Offcanvas.Header closeButton>
+                        <Offcanvas.Title>Filter</Offcanvas.Title>
+                    </Offcanvas.Header>
+                    <Offcanvas.Body>
+                        <div className="d-flex flex-column">
+                            <div className="mb-2">
+                                <Select
+                                    options={this.month}
+                                    styles={{
+                                        container:(baseStyles, state)=>({
+                                            ...baseStyles,
+                                            zIndex:10
+                                        })
+                                    }}
+                                    value={this.month.find(f=>f.value==bulan)}
+                                    onChange={e=>this.typeBulan(e.value)}
+                                    placeholder="Pilih Bulan"
+                                    isSearchable
+                                />
+                            </div>
+                            <div className="mb-2">
+                                <CreatableSelect
+                                    options={this.tahun_options()}
+                                    onChange={e=>this.typeTahun(e.value)}
+                                    value={this.tahun_options().find(f=>f.value==tahun)}
+                                    placeholder="Pilih Tahun"
+                                    styles={{
+                                        container:(baseStyles, state)=>({
+                                            ...baseStyles,
+                                            zIndex:9
+                                        })
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </Offcanvas.Body>
+                </Offcanvas>
             </>
         )
     }

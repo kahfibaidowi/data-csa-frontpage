@@ -6,7 +6,7 @@ import { FiBarChart2, FiChevronDown, FiChevronUp, FiCloudRain, FiCloudSnow, FiHo
 
 const MenuSidebar=(props)=>{
     return (
-        <Offcanvas show={props.show_menu} placement="start" onHide={()=>props.setShowMenu(false)}>
+        <Offcanvas className="sidebar-open" show={props.show_menu} placement="start" onHide={()=>props.setShowMenu(false)}>
             <Offcanvas.Header>
                 <Offcanvas.Title>
                     <a href="/" className="navbar-brand me-auto ms-3 ms-lg-0">

@@ -3,7 +3,7 @@ import update from "immutability-helper"
 import { isUndefined, mapbox_access_token, WINDY_KEY } from "@/Config/config"
 import { Map, LayersControl, TileLayer, Marker, Popup, GeoJSON, Tooltip, ZoomControl, useLeaflet, MapControl } from "react-windy-leaflet"
 import CreatableSelect from "react-select/creatable"
-import { FiAlertTriangle, FiHome, FiMenu, FiSearch, FiUpload } from "react-icons/fi"
+import { FiAlertTriangle, FiFilter, FiHome, FiMenu, FiSearch, FiUpload } from "react-icons/fi"
 import Select from "react-select"
 import { Dropdown, Offcanvas } from "react-bootstrap"
 import * as turf from '@turf/turf'
@@ -16,6 +16,7 @@ const { BaseLayer, Overlay } = LayersControl;
 
 
 const MapWindy=(props)=>{
+    const [mobile_show, setMobileShow]=useState(false)
     const [bulan, setBulan]=useState("")
     const [center, setCenter]=useState({
         latitude:-1.973,
@@ -231,7 +232,16 @@ const MapWindy=(props)=>{
                         </button>
                         <h4 className="ms-3 mb-0 d-none d-md-inline fs-5 fw-semibold">Peringatan Dini Banjir</h4>
                     </div>
-                    <div className="d-flex">
+                    <div className="d-flex d-md-none">
+                        <button
+                            type="button" 
+                            className="btn btn-secondary btn-icon"
+                            onClick={e=>setMobileShow(true)}
+                        >
+                            <FiFilter/>
+                        </button>
+                    </div>
+                    <div className="d-none d-md-flex">
                         <div class="ms-3" style={{minWidth:"250px"}}>
                             <Typeahead
                                 id="rendering-example"
@@ -404,6 +414,89 @@ const MapWindy=(props)=>{
                     </table>
                 </div>
             </div>
+
+            {/* FILTER MOBILE */}
+            <Offcanvas show={mobile_show} onHide={()=>setMobileShow(false)} placement="end">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Filter</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    <div className="d-flex flex-column">
+                        <div class="mb-2">
+                            <Typeahead
+                                id="rendering-example"
+                                labelKey="region"
+                                options={props.search_data}
+                                placeholder="Cari Wilayah ..."
+                                maxResults={10}
+                                onChange={e=>{
+                                    if(e.length>0){
+                                        if(mapRef.current.leafletElement==null) return
+
+                                        mapRef.current.leafletElement.setView([e[0].center.latitude, e[0].center.longitude], e[0].center.zoom)
+                                        setCenter({
+                                            latitude:e[0].center.latitude,
+                                            longitude:e[0].center.longitude,
+                                            zoom:e[0].center.zoom
+                                        })
+                                    }
+                                }}
+                                renderMenuItemChildren={(option, {text})=>{
+                                    return (
+                                        <>
+                                            <Highlighter search={text} highlightClassName="pe-0">{option.region}</Highlighter>
+                                            <div className="text-muted">
+                                                <small>
+                                                    {option.type=="kabupaten_kota"?
+                                                        <>
+                                                            {option.provinsi}
+                                                        </>
+                                                    :
+                                                        <>
+                                                            {option.kabupaten_kota}, {' '}
+                                                            {option.provinsi}
+                                                        </>
+                                                    }
+                                                </small>
+                                            </div>
+                                        </>
+                                    )
+                                }}
+                                
+                            />
+                        </div>
+                        <div className="mb-2">
+                            <CreatableSelect
+                                options={tahun_options()}
+                                onChange={e=>props.typeTahun(e)}
+                                value={tahun_options().find(f=>f.value==props.tahun)}
+                                placeholder="Pilih Tahun"
+                                styles={{
+                                    container:(baseStyles, state)=>({
+                                        ...baseStyles,
+                                        zIndex:10
+                                    })
+                                }}
+                            />
+                        </div>
+                        <div className="mb-2">
+                            <Select
+                                options={month}
+                                styles={{
+                                    container:(baseStyles, state)=>({
+                                        ...baseStyles,
+                                        zIndex:9
+                                    })
+                                }}
+                                value={month.find(f=>f.value==bulan)}
+                                onChange={e=>setBulan(e.value)}
+                                placeholder="Pilih Bulan"
+                                isSearchable
+                            />
+                        </div>
+                    </div>
+                </Offcanvas.Body>
+            </Offcanvas>
         </>
     )
 }
