@@ -13,6 +13,7 @@ import { Collapse, Offcanvas } from "react-bootstrap"
 import classNames from "classnames"
 import MenuSidebar from "@/Components/menu_sidebar"
 import { ToastApp } from "@/Components/toast"
+import { SyncLoader } from "react-spinners"
 
 
 
@@ -31,7 +32,8 @@ class Frontpage extends React.Component{
         kekeringan:[],
         loaded:false,
         show_menu:false,
-        collapse:"peringatan_dini"
+        collapse:"peringatan_dini",
+        is_loading:false
     }
 
     componentDidMount=()=>{
@@ -85,6 +87,7 @@ class Frontpage extends React.Component{
     fetchSummarySifatHujanKabupatenKota=async()=>{
         const {tahun}=this.state
 
+        this.setState({is_loading:true})
         await this.request.apiGetSummarySifatHujanKabupatenKota(tahun)
         .then(data=>{
             //map
@@ -157,7 +160,8 @@ class Frontpage extends React.Component{
             
             this.setState({
                 map_curah_hujan:geo_features,
-                search_curah_hujan:search_regions
+                search_curah_hujan:search_regions,
+                is_loading:false
             })
         })
         .catch(err=>{
@@ -166,6 +170,7 @@ class Frontpage extends React.Component{
             }
             else{
                 toast.error("Gets Data Failed!", {position:"bottom-center"})
+                this.setState({is_loading:false})
             }
         })
     }
@@ -287,7 +292,7 @@ class Frontpage extends React.Component{
     }
 
     render(){
-        const {tahun, map_curah_hujan, search_curah_hujan, show_menu, collapse}=this.state
+        const {tahun, map_curah_hujan, search_curah_hujan, show_menu, collapse, is_loading}=this.state
 
         return (
             <>
@@ -302,6 +307,25 @@ class Frontpage extends React.Component{
                     typeTahun={this.typeTahun}
                     tahun={tahun}
                 />
+                <div 
+                    className={classNames("d-flex justify-content-center align-items-center w-100 h-100", {"invisible":!is_loading})}
+                    style={{
+                        position:"absolute", 
+                        top:0, 
+                        left:0, 
+                        background:"rgba(0, 0, 0, .35)",
+                        zIndex:997
+                    }}
+                >
+                    <SyncLoader
+                        color={"#fff"}
+                        loading={true}
+                        cssOverride={{position:"relative"}}
+                        size={20}
+                        aria-label="Loading Spinner"
+                        data-testid="loader"
+                    />
+                </div>
 
                 <MenuSidebar
                     show_menu={show_menu}

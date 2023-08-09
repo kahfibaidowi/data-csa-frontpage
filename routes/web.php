@@ -31,3 +31,5 @@ Route::get('/post/{id}/{title}', [FrontpageController::class, "post"]);
 Route::get('/sebaran_opt', [FrontpageController::class, "sebaran_opt"]);
 Route::get('/sebaran_opt/peta', [FrontpageController::class, "peta_sebaran_opt"]);
 Route::get('/test_map', [FrontpageController::class, "test_map"]);
+Route::get('/test_map_vector_tile', [FrontpageController::class, "test_map_vector_tile"]);
+Route::get('/test', [FrontpageController::class, "test"]);

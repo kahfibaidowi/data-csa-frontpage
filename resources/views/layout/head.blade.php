@@ -54,9 +54,6 @@
                                     <a class="dropdown-item fs-14px" href="/sebaran_opt/peta">Peta Sebaran</a>
                                 </div>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link link-dark fs-15px fw-medium" href="/info_grafis">Infografis</a>
-                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link link-dark fs-15px fw-medium dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   Peringatan Dini
@@ -65,7 +62,7 @@
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item fs-14px" href="/peringatan_dini/banjir">Banjir</a>
                                     <a class="dropdown-item fs-14px" href="/peringatan_dini/kekeringan">Kekeringan</a>
-                                    <a class="dropdown-item fs-14px" href="#">Sebaran OPT</a>
+                                    <a class="dropdown-item fs-14px" href="/info_grafis">Infografis</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">

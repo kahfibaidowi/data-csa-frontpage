@@ -339,6 +339,20 @@ class FrontpageController extends Controller
         ]);
     }
 
+    public function test_map_vector_tile()
+    {
+        return Inertia::render('TestMapVectorTile', [
+            'data'  =>"xkdf"
+        ]);
+    }
+
+    public function test()
+    {
+        return Inertia::render('Test', [
+            'data'  =>"xkdf"
+        ]);
+    }
+
     private function data_pengaturan()
     {
         //--pengaturan

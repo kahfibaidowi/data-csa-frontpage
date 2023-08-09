@@ -26,6 +26,13 @@ export const sheetColumn=(col)=>{
     }
     return s.toUpperCase();
 }
+export const download=(content, fileName, contentType)=>{
+    var a = document.createElement("a");
+    var file = new Blob([content], {type: contentType});
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+}
 
 /* CENTEROID */
 const area=(poly)=>{
@@ -56,4 +63,39 @@ export const paginate=(array, page_size, page_number)=>{
 export const ceil=num=>{
     if(num=="") return ""
     else return Math.ceil(num)
+}
+
+export const explode_ch_generated=(generated)=>{
+    const exp=generated.toString().split("|")
+
+    //ex=2023|10|1|85
+    return {
+        curah_hujan:Number(exp[3]),
+        tahun:Number(exp[0]),
+        bulan:Number(exp[1]),
+        input_ke:Number(exp[2])
+    }
+}
+
+export const month_selected=(bulan)=>{
+    if(bulan.toString().trim()=="") return {bulan:"", input_ke:""}
+    else{
+        const new_bulan=bulan.toString().split("_")
+        return {bulan:new_bulan[0], input_ke:new_bulan[1]}
+    }
+}
+
+export const ch_from_properties=(prop_json, tahun, bulan_parsed)=>{
+    let ch=""
+
+    const curah_hujan=JSON.parse(prop_json.curah_hujan)
+    const input_ke=tahun+"|"+bulan_parsed.bulan+"|"+bulan_parsed.input_ke+"|"
+    const input=curah_hujan.filter(ch=>ch.indexOf(input_ke)==0)
+
+    if(input.length>0){
+        const input_extracted=explode_ch_generated(input[0])
+        ch=ceil(input_extracted.curah_hujan)
+    }
+
+    return ch
 }

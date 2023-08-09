@@ -67,12 +67,6 @@ const MenuSidebar=(props)=>{
                                 </div>
                             </Collapse>
                         </li>
-                        <li class="nav-item">
-                            <a href="/info_grafis" class="nav-link">
-                                <FiBarChart2 className="link-icon"/>
-                                <span class="link-title">Infografis</span>
-                            </a>
-                        </li>
                         <li 
                             className={classNames(
                                 "nav-item",
@@ -102,8 +96,8 @@ const MenuSidebar=(props)=>{
                                             </a>
                                         </li>
                                         <li className="nav-item">
-                                            <a href="#" className={classNames("nav-link")}>
-                                                Sebaran OPT
+                                            <a href="/info_grafis" className={classNames("nav-link")}>
+                                                Infofrafis
                                             </a>
                                         </li>
                                     </ul>

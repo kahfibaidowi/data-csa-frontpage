@@ -29,8 +29,10 @@
         "classnames": "^2.3.2",
         "geojson-polygon-center": "^0.0.0",
         "geojson-vt": "^3.2.1",
+        "haversine-distance": "^1.2.1",
         "immutability-helper": "^3.1.1",
-        "leaflet": "1.4.0",
+        "jsonpack": "^1.1.5",
+        "leaflet": "^1.9.4",
         "leaflet-geojson-vt": "^1.1.0",
         "leaflet-geosearch": "^3.7.0",
         "leaflet-glify-layer": "^0.0.6",
@@ -46,8 +48,10 @@
         "react-leaflet": "3.1.0",
         "react-number-format": "4.9.3",
         "react-select": "^5.7.0",
+        "react-spinners": "^0.13.8",
         "react-toastify": "^9.1.1",
         "react-windy-leaflet": "^0.2.0",
+        "topojson-server": "^3.0.1",
         "underscore": "^1.13.6"
     }
 }

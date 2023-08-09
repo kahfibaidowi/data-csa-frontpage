@@ -533,7 +533,8 @@ const ModalDetail=({data, hideModal})=>{
                     onSelect={e=>setTabOpen(e)}
                 >
                     <Tab eventKey="cabai-besar" title="Cabai Besar">
-                        <p>Curah hujan optimal untuk cabai merah adalah <strong>100-200mm/bulan</strong></p>
+                        <p className='mb-2'>Curah hujan optimal untuk cabai merah adalah <strong>100-200mm/bulan</strong></p>
+                        <p className='mb-2'><span className='fw-semibold'>Rekomendasi :</span> Petani tetap bisa menanam cabai merah diluar rekomendasi jadwal tanam asalkan kebutuhan air dengan pompa, sible atau disel dapat terpenuhi dengan cukup.</p>
                         <div className="table-responsive mt-3">
                             <table className="table table-hover table-hover table-custom table-wrap mb-0">
                                 <thead className="thead-light">
@@ -571,7 +572,9 @@ const ModalDetail=({data, hideModal})=>{
                         </div>
                     </Tab>
                     <Tab eventKey="cabai-rawit" title="Cabai Rawit">
-                        <p>Curah hujan optimal untuk cabai rawit adalah <strong>85-250mm/bulan</strong></p>
+                        <p className='mb-2'>Curah hujan optimal untuk cabai rawit adalah <strong>85-250mm/bulan</strong></p>
+                        <p className='mb-2'><span className='fw-semibold'>Rekomendasi :</span> Petani tetap bisa menanam cabai rawit diluar rekomendasi jadwal tanam asalkan kebutuhan air dengan pompa, sible atau disel dapat terpenuhi dengan cukup.</p>
+                        <div className="table-responsive mt-3"></div>
                         <div className="table-responsive mt-3">
                             <table className="table table-hover table-hover table-custom table-wrap mb-0">
                                 <thead className="thead-light">
@@ -609,7 +612,9 @@ const ModalDetail=({data, hideModal})=>{
                         </div>
                     </Tab>
                     <Tab eventKey="bawang-merah" title="Bawang Merah">
-                        <p>Curah hujan optimal untuk bawang merah adalah <strong>80-200mm/bulan</strong></p>
+                        <p className='mb-2'>Curah hujan optimal untuk bawang merah adalah <strong>80-200mm/bulan</strong></p>
+                        <p className='mb-2'><span className='fw-semibold'>Rekomendasi :</span> Petani tetap bisa menanam bawang merah diluar rekomendasi jadwal tanam asalkan kebutuhan air dengan pompa, sible atau disel dapat terpenuhi dengan cukup.</p>
+                        <div className="table-responsive mt-3"></div>
                         <div className="table-responsive mt-3">
                             <table className="table table-hover table-hover table-custom table-wrap mb-0">
                                 <thead className="thead-light">

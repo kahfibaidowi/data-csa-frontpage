@@ -38,9 +38,6 @@ export const Layout=({children, withFooter=true, pengaturan, footer})=>{
                                         <NavDropdown.Item className='fs-14px' href="/sebaran_opt/peta">Peta Sebaran</NavDropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
-                                <li class="nav-item">
-                                    <a class="nav-link link-dark fs-15px fw-medium" href="/info_grafis">Infografis</a>
-                                </li>
                                 <Dropdown>
                                     <Dropdown.Toggle className='nav-link link-dark fs-15px fw-medium' as="a" href="#">
                                         Peringatan Dini
@@ -49,7 +46,7 @@ export const Layout=({children, withFooter=true, pengaturan, footer})=>{
                                     <Dropdown.Menu>
                                         <NavDropdown.Item className='fs-14px' href="/peringatan_dini/banjir">Banjir</NavDropdown.Item>
                                         <NavDropdown.Item className='fs-14px' href="/peringatan_dini/kekeringan">Kekeringan</NavDropdown.Item>
-                                        <NavDropdown.Item className='fs-14px' href="#">Sebaran OPT</NavDropdown.Item>
+                                        <NavDropdown.Item className='fs-14px' href="/info_grafis">Infografis</NavDropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
                                 {/* <li class="nav-item">

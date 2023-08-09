@@ -1,12 +1,12 @@
 import React from "react"
+import classNames from "classnames"
+import update from "immutability-helper"
 import L from "leaflet"
-import geojsonvt from "geojson-vt"
-window.geojsonvt = geojsonvt
-import "leaflet-geojson-vt/src/leaflet-geojson-vt"
+import "leaflet.vectorgrid"
 import { toast } from "react-toastify"
 import { api } from "@/Config/api"
-import { isUndefined } from "@/Config/config"
-import { ceil } from "@/Config/helpers"
+import { BASE_URL_XP, isUndefined } from "@/Config/config"
+import { ceil, ch_from_properties, month_selected } from "@/Config/helpers"
 import { MapContainer, TileLayer } from "react-leaflet"
 import { useEffect } from "react"
 import { FiFilter, FiMenu } from "react-icons/fi"
@@ -15,8 +15,14 @@ import CreatableSelect from "react-select/creatable"
 import MenuSidebar from "@/Components/menu_sidebar"
 import { ToastApp } from "@/Components/toast"
 import { Offcanvas } from "react-bootstrap"
+import { Highlighter, Typeahead } from "react-bootstrap-typeahead"
+import haversine from "haversine-distance"
+import { SyncLoader } from "react-spinners"
 
 
+L.DomEvent.fakeStop = function () {
+    return true;
+}
 class Frontpage extends React.Component{
     state={
         tahun:"",
@@ -24,11 +30,16 @@ class Frontpage extends React.Component{
         show_menu:false,
         collapse:"jadwal_tanam",
         map:null,
+        geo_json_label:null,
+        geo_json:[],
         position:[-1.973, 116.253],
+        zoom:5,
         kecamatan:[],
         is_loading:false,
-        mobile_show:false
+        mobile_show:false,
+        search_data:[]
     }
+
 
     componentDidMount=async()=>{
         const myMap=L.map('mapid', {
@@ -60,105 +71,20 @@ class Frontpage extends React.Component{
                 bulan:(date.getMonth()+1)+"_"+input,
                 tahun:date.getFullYear()
             }, async()=>{
-                await this.fetchCurahHujan()
+                await this.renderJSONVT()
             })
         })
     }
+    renderJSONVT=()=>{
+        //options
+        const {map, tahun, bulan}=this.state
 
-    request={
-        apiGetCurahHujanKecamatan:async(tahun)=>{
-            return await api().get("/frontpage/summary/type/curah_hujan_kecamatan", {
-                params:{
-                    tahun,
-                    regency_id:""
-                }
-            })
-            .then(res=>res.data)
-        }
-    }
-    fetchCurahHujan=async()=>{
-        const {tahun}=this.state
-
-        this.setState({is_loading:true})
-        await this.request.apiGetCurahHujanKecamatan(tahun)
-        .then(data=>{
-            const kecamatan=data.data.map((k, idx)=>{
-                return {
-                    type:"Feature",
-                    properties:{
-                        region:k.region,
-                        curah_hujan:k.curah_hujan
-                    },
-                    geometry:!isUndefined(k.geo_json.graph)?k.geo_json.graph:{type:"MultiPolygon", coordinates:[]}
-                }
-            })
-
-            this.setState({
-                kecamatan:kecamatan,
-                is_loading:false
-            })
-            this.renderJSONVT(kecamatan, this.month_selected())
-        })
-        .catch(err=>{
-            if(err.name=="CanceledError"){
-                toast.warn("Request Aborted!", {position:"bottom-center"})
-            }
-            else{
-                toast.error("Gets Data Failed!", {position:"bottom-center"})
-                
-                this.setState({
-                    is_loading:false
-                })
-            }
-        })
-    }
-    renderJSONVT=(kecamatan)=>{
-        const month=this.month_selected()
-
-        //geojson
-        const geo_json={
-            type:"FeatureCollection",
-            features:kecamatan.map(kec=>{
-                const ch=kec.properties.curah_hujan.find(f=>f.bulan.toString()==month.bulan.toString() && f.input_ke.toString()==month.input_ke.toString())
-
-                return {
-                    type:kec.type,
-                    properties:{
-                        region:kec.properties.region,
-                        curah_hujan:!isUndefined(ch)?ch.curah_hujan:""
-                    },
-                    geometry:kec.geometry
-                }
-            })
-        }
-
-        //geojson vt
+        const bulan_parsed=month_selected(bulan)
         let ch_toleransi=0
         let min=100-ch_toleransi
         let max=200+ch_toleransi
-
-        const options={
-            maxZoom: 20,
-            tolerance: 3,
-            debug: 0,
-            style:properties=>{
-                const ch=ceil(properties.curah_hujan)
-
-                let color="#8c2323"
-                if(ch>=min && ch<=max) color="#238c3f"
-
-                return {
-                    fillColor:color,
-                    color:color,
-                    weight:0.8,
-                    opacity:0.8,
-                    fillOpacity:0.8,
-                }
-            }
-        }
         
         //map
-        const {map}=this.state
         if(map!=null){
             map.remove()
         }
@@ -166,7 +92,8 @@ class Frontpage extends React.Component{
         const myMap=L.map('mapid', {
             center:[-1.973, 116.253],
             zoom: 5,
-            zoomControl:false
+            zoomControl:false,
+            maxZoom:16
         })
         L.control.zoom({
             position:"topright"
@@ -176,14 +103,63 @@ class Frontpage extends React.Component{
             attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(myMap)
 
-        //geojson vt
+        //vector grid
+        L.vectorGrid.protobuf(BASE_URL_XP+"/kecamatan/{z}/{x}/{y}", {
+            rendererFactory: L.canvas.tile,
+            interactive: true,
+            vectorTileLayerStyles:{
+                kecamatan:(properties, zoom)=>{
+                    const ch=ch_from_properties(properties, tahun, bulan_parsed)
+
+                    let color="#8c2323"
+                    if(ch>=min && ch<=max) color="#238c3f"
+
+                    let zoom_opacity=0
+                    if(zoom>=10) zoom_opacity=0.8
+
+                    return {
+                        fill:true,
+                        fillColor:color,
+                        color:"#fff",
+                        weight:1,
+                        opacity:zoom_opacity,
+                        fillOpacity:0.8,
+                    }
+                }
+            },
+            getFeatureId:f=>{
+                return f.properties['id_region']
+            }
+        })
+        .on("click", e=>{
+            const prop=e.layer.properties
+            const ch=ch_from_properties(prop, tahun, bulan_parsed)
+
+            L.popup()
+            .setContent(
+                "<div class='d-flex flex-column'>"+
+                    "<div> Kecamatan : <span class='fw-bold'>"+prop.region+"</span></div>"+
+                    "<div> Curah Hujan : <span class='fw-bold'>"+ch+"</span></div>"+
+                "</div>"
+            )
+            .setLatLng(e.latlng)
+            .openOn(myMap)
+
+            var style={
+                stroke: true,
+                color: 'red',
+                weight: 2,
+                opacity: 1
+            }
+            vectorGrid.setFeatureStyle(prop['id_region'], style)
+        })
+        .addTo(myMap)
+
+        //state
         this.setState({
             map:myMap
-        }, ()=>{
-            L.geoJson.vt(geo_json, options).addTo(myMap)
         })
     }
-
 
     //helpers
     getInput=()=>{
@@ -201,7 +177,7 @@ class Frontpage extends React.Component{
         this.setState({
             tahun:value
         }, ()=>{
-            this.fetchCurahHujan()
+            this.renderJSONVT()
         })
     }
     typeBulan=value=>{
@@ -209,7 +185,7 @@ class Frontpage extends React.Component{
             this.setState({
                 bulan:value
             }, ()=>{
-                this.renderJSONVT(this.state.kecamatan)
+                this.renderJSONVT()
             })
         }
     }
@@ -287,7 +263,7 @@ class Frontpage extends React.Component{
     }
     
     render(){
-        const {tahun, bulan, show_menu, collapse}=this.state
+        const {tahun, bulan, show_menu, collapse, search_data, is_loading}=this.state
 
         return (
             <>
@@ -313,7 +289,31 @@ class Frontpage extends React.Component{
                             </button>
                         </div>
                         <div className="d-none d-md-flex">
-                            <div style={{minWidth:"120px"}}>
+                            <div class="ms-3" style={{minWidth:"250px"}}>
+                                <Typeahead
+                                    id="rendering-example"
+                                    labelKey="region"
+                                    options={search_data}
+                                    placeholder="Cari Wilayah ..."
+                                    maxResults={10}
+                                    onChange={e=>{
+                                        if(e.length>0){
+                                            if(this.state.map==null) return
+
+                                            this.state.map.setView([e[0].center.latitude, e[0].center.longitude], e[0].center.zoom)
+                                        }
+                                    }}
+                                    renderMenuItemChildren={(option, {text})=>{
+                                        return (
+                                            <>
+                                                <Highlighter search={text} highlightClassName="pe-0">{option.region}</Highlighter>
+                                            </>
+                                        )
+                                    }}
+                                    
+                                />
+                            </div>
+                            <div className="ms-2" style={{minWidth:"120px"}}>
                                 <Select
                                     options={this.month}
                                     styles={{
@@ -371,6 +371,27 @@ class Frontpage extends React.Component{
                         </table>
                     </div>
                 </div>
+                
+                {/* LOADER */}
+                <div 
+                    className={classNames("d-flex justify-content-center align-items-center w-100 h-100", {"invisible":!is_loading})}
+                    style={{
+                        position:"absolute", 
+                        top:0, 
+                        left:0, 
+                        background:"rgba(0, 0, 0, .35)",
+                        zIndex:997
+                    }}
+                >
+                    <SyncLoader
+                        color={"#fff"}
+                        loading={true}
+                        cssOverride={{position:"relative"}}
+                        size={20}
+                        aria-label="Loading Spinner"
+                        data-testid="loader"
+                    />
+                </div>
 
                 <MenuSidebar
                     show_menu={show_menu}
@@ -389,6 +410,30 @@ class Frontpage extends React.Component{
                     </Offcanvas.Header>
                     <Offcanvas.Body>
                         <div className="d-flex flex-column">
+                            <div class="mb-2">
+                                <Typeahead
+                                    id="rendering-example"
+                                    labelKey="region"
+                                    options={search_data}
+                                    placeholder="Cari Wilayah ..."
+                                    maxResults={10}
+                                    onChange={e=>{
+                                        if(e.length>0){
+                                            if(this.state.map==null) return
+
+                                            this.state.map.setView([e[0].center.latitude, e[0].center.longitude], e[0].center.zoom)
+                                        }
+                                    }}
+                                    renderMenuItemChildren={(option, {text})=>{
+                                        return (
+                                            <>
+                                                <Highlighter search={text} highlightClassName="pe-0">{option.region}</Highlighter>
+                                            </>
+                                        )
+                                    }}
+                                    
+                                />
+                            </div>
                             <div className="mb-2">
                                 <Select
                                     options={this.month}

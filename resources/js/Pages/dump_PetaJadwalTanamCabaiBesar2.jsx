@@ -1,12 +1,14 @@
 import React from "react"
 import classNames from "classnames"
 import update from "immutability-helper"
-import L, { latLng, vectorGrid } from "leaflet"
-import "leaflet.vectorgrid"
-import { ToastContainer, toast } from "react-toastify"
+import L from "leaflet"
+import geojsonvt from "geojson-vt"
+window.geojsonvt = geojsonvt
+import "leaflet-geojson-vt/src/leaflet-geojson-vt"
+import { toast } from "react-toastify"
 import { api } from "@/Config/api"
-import { BASE_URL_XP, isUndefined } from "@/Config/config"
-import { ceil, ch_from_properties, download, explode_ch_generated, month_selected } from "@/Config/helpers"
+import { isUndefined } from "@/Config/config"
+import { ceil } from "@/Config/helpers"
 import { MapContainer, TileLayer } from "react-leaflet"
 import { useEffect } from "react"
 import { FiFilter, FiMenu } from "react-icons/fi"
@@ -18,13 +20,8 @@ import { Offcanvas } from "react-bootstrap"
 import { Highlighter, Typeahead } from "react-bootstrap-typeahead"
 import haversine from "haversine-distance"
 import { SyncLoader } from "react-spinners"
-import jsonpack from "jsonpack"
-import { topology } from "topojson-server"
 
 
-L.DomEvent.fakeStop = function () {
-    return true;
-}
 class Frontpage extends React.Component{
     state={
         tahun:"",
@@ -41,7 +38,6 @@ class Frontpage extends React.Component{
         mobile_show:false,
         search_data:[]
     }
-
 
     componentDidMount=async()=>{
         const myMap=L.map('mapid', {
@@ -72,21 +68,120 @@ class Frontpage extends React.Component{
             this.setState({
                 bulan:(date.getMonth()+1)+"_"+input,
                 tahun:date.getFullYear()
-            }, ()=>{
-                this.renderJSONVT()
+            }, async()=>{
+                await this.fetchCurahHujan()
             })
         })
     }
-    renderJSONVT=()=>{
-        //options
-        const {map, tahun, bulan}=this.state
 
-        const bulan_parsed=month_selected(bulan)
+    abortController=new AbortController()
+    request={
+        apiGetCurahHujanKecamatan:async(tahun)=>{
+            this.abortController.abort()
+            this.abortController=new AbortController()
+
+            return await api().get("/frontpage/summary/type/curah_hujan_kecamatan", {
+                params:{
+                    tahun,
+                    regency_id:""
+                },
+                signal:this.abortController.signal
+            })
+            .then(res=>res.data)
+        }
+    }
+    fetchCurahHujan=async()=>{
+        const {tahun}=this.state
+
+        this.setState({is_loading:true})
+        await this.request.apiGetCurahHujanKecamatan(tahun)
+        .then(data=>{
+            const kecamatan=data.data.map((k, idx)=>{
+                return {
+                    type:"Feature",
+                    properties:{
+                        region:k.region,
+                        curah_hujan:k.curah_hujan,
+                        center:k.geo_json.map_center
+                    },
+                    geometry:!isUndefined(k.geo_json.graph)?k.geo_json.graph:{type:"MultiPolygon", coordinates:[]}
+                }
+            })
+            const search_data=data.data.map(k=>{
+                return update(k, {
+                    center:{$set:k.geo_json.map_center},
+                    geo_json:{$set:undefined},
+                    curah_hujan:{$set:undefined}
+                })
+            })
+
+            this.setState({
+                kecamatan:kecamatan,
+                is_loading:false,
+                search_data
+            })
+            this.renderJSONVT(kecamatan)
+        })
+        .catch(err=>{
+            if(err.name=="CanceledError"){
+                toast.warn("Request Aborted!", {position:"bottom-center"})
+            }
+            else{
+                toast.error("Gets Data Failed!", {position:"bottom-center"})
+                
+                this.setState({
+                    is_loading:false
+                })
+            }
+        })
+    }
+    renderJSONVT=(kecamatan)=>{
+        const month=this.month_selected()
+
+        //geojson
+        const geo_json={
+            type:"FeatureCollection",
+            features:kecamatan.map(kec=>{
+                const ch=kec.properties.curah_hujan.find(f=>f.bulan.toString()==month.bulan.toString() && f.input_ke.toString()==month.input_ke.toString())
+
+                return {
+                    type:kec.type,
+                    properties:{
+                        region:kec.properties.region,
+                        curah_hujan:!isUndefined(ch)?ch.curah_hujan:""
+                    },
+                    geometry:kec.geometry
+                }
+            })
+        }
+
+        //geojson vt
         let ch_toleransi=0
-        let min=80-ch_toleransi
+        let min=100-ch_toleransi
         let max=200+ch_toleransi
+
+        const options={
+            maxZoom: 20,
+            tolerance: 3,
+            debug: 0,
+            style:properties=>{
+                const ch=ceil(properties.curah_hujan)
+
+                let color="#8c2323"
+                if(ch>=min && ch<=max) color="#238c3f"
+
+                return {
+                    fillColor:color,
+                    color:color,
+                    weight:1,
+                    opacity:1,
+                    fillOpacity:0.8,
+                }
+            }
+        }
         
         //map
+        const {map}=this.state
         if(map!=null){
             map.remove()
         }
@@ -94,8 +189,7 @@ class Frontpage extends React.Component{
         const myMap=L.map('mapid', {
             center:[-1.973, 116.253],
             zoom: 5,
-            zoomControl:false,
-            maxZoom:16
+            zoomControl:false
         })
         L.control.zoom({
             position:"topright"
@@ -105,62 +199,70 @@ class Frontpage extends React.Component{
             attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(myMap)
 
-        //vector grid
-        L.vectorGrid.protobuf(BASE_URL_XP+"/kecamatan/{z}/{x}/{y}", {
-            rendererFactory: L.canvas.tile,
-            interactive: true,
-            vectorTileLayerStyles:{
-                kecamatan:(properties, zoom)=>{
-                    const ch=ch_from_properties(properties, tahun, bulan_parsed)
-
-                    let color="#8c2323"
-                    if(ch>=min && ch<=max) color="#238c3f"
-
-                    let zoom_opacity=0
-                    if(zoom>=10) zoom_opacity=0.8
-
-                    return {
-                        fill:true,
-                        fillColor:color,
-                        color:"#fff",
-                        weight:1,
-                        opacity:zoom_opacity,
-                        fillOpacity:0.8,
-                    }
-                }
-            },
-            getFeatureId:f=>{
-                return f.properties['id_region']
-            }
-        })
-        .on("click", e=>{
-            const prop=e.layer.properties
-            const ch=ch_from_properties(prop, tahun, bulan_parsed)
-
-            L.popup()
-            .setContent(
-                "<div class='d-flex flex-column'>"+
-                    "<div> Kecamatan : <span class='fw-bold'>"+prop.region+"</span></div>"+
-                    "<div> Curah Hujan : <span class='fw-bold'>"+ch+"</span></div>"+
-                "</div>"
-            )
-            .setLatLng(e.latlng)
-            .openOn(myMap)
-
-            var style={
-                stroke: true,
-                color: 'red',
-                weight: 2,
-                opacity: 1
-            }
-            vectorGrid.setFeatureStyle(prop['id_region'], style)
-        })
-        .addTo(myMap)
-
         //state
         this.setState({
             map:myMap
+        }, ()=>{
+            myMap.on("dragend", e=>{
+                this.updateLabel(myMap.getCenter(), myMap.getZoom())
+            })
+            myMap.on("zoomend", e=>{
+                this.updateLabel(myMap.getCenter(), myMap.getZoom())
+            })
+
+            L.geoJson.vt(geo_json, options).addTo(myMap)
         })
+    }
+    updateLabel=(latlng, zoom)=>{
+        const {geo_json_label, map, kecamatan}=this.state
+
+        if(zoom>=10){
+            if(geo_json_label!=null){
+                map.removeLayer(geo_json_label)
+            }
+
+            const data_geo_json=kecamatan.filter(f=>{
+                let coord={lat:f.properties.center.latitude, lng:f.properties.center.longitude}
+
+                if(haversine(latlng, coord)<50000) return true
+                return false
+            })
+            const geo_json={
+                type:"FeatureCollection",
+                features:data_geo_json.map(kec=>{
+                    return {
+                        type:kec.type,
+                        properties:{
+                            region:kec.properties.region,
+                            center:kec.properties.map_center
+                        },
+                        geometry:kec.geometry
+                    }
+                })
+            }
+
+            const g_label=L.geoJSON(geo_json, {
+                style:{
+                    color:"#fff",
+                    weight:0,
+                    fillColor:"#0f0",
+                    fillOpacity:0
+                },
+                onEachFeature:(feature, layer)=>{
+                    layer.bindTooltip(feature.properties.region.toString(), {permanent:true, direction:"center", className:"tooltip-region"})
+                }
+            })
+            map.addLayer(g_label)
+
+            this.setState({
+                geo_json_label:g_label
+            })
+        }
+        else{
+            if(geo_json_label!=null){
+                map.removeLayer(geo_json_label)
+            }
+        }
     }
 
 
@@ -180,7 +282,7 @@ class Frontpage extends React.Component{
         this.setState({
             tahun:value
         }, ()=>{
-            this.renderJSONVT()
+            this.fetchCurahHujan()
         })
     }
     typeBulan=value=>{
@@ -188,7 +290,7 @@ class Frontpage extends React.Component{
             this.setState({
                 bulan:value
             }, ()=>{
-                this.renderJSONVT()
+                this.renderJSONVT(this.state.kecamatan)
             })
         }
     }
@@ -280,7 +382,7 @@ class Frontpage extends React.Component{
                             >
                                 <FiMenu/>
                             </button>
-                            <h4 className="ms-3 mb-0 d-none d-md-inline fs-5 fw-semibold">Jadwal Tanam Optimal Bawang Merah</h4>
+                            <h4 className="ms-3 mb-0 d-none d-md-inline fs-5 fw-semibold">Jadwal Tanam Optimal Cabai Besar</h4>
                         </div>
                         <div className="d-flex d-md-none">
                             <button
@@ -374,7 +476,7 @@ class Frontpage extends React.Component{
                         </table>
                     </div>
                 </div>
-
+                
                 {/* LOADER */}
                 <div 
                     className={classNames("d-flex justify-content-center align-items-center w-100 h-100", {"invisible":!is_loading})}

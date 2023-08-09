@@ -13,6 +13,7 @@ import { Collapse, Offcanvas } from "react-bootstrap"
 import classNames from "classnames"
 import MenuSidebar from "@/Components/menu_sidebar"
 import { ToastApp } from "@/Components/toast"
+import { SyncLoader } from "react-spinners"
 
 
 
@@ -141,7 +142,7 @@ class Frontpage extends React.Component{
     //HELPERS
 
     render(){
-        const {tahun, bulan, sebaran_opt, search_data, show_menu, collapse}=this.state
+        const {tahun, bulan, sebaran_opt, search_data, show_menu, collapse, is_loading}=this.state
 
         return (
             <>
@@ -158,6 +159,25 @@ class Frontpage extends React.Component{
                     tahun={tahun}
                     bulan={bulan}
                 />
+                <div 
+                    className={classNames("d-flex justify-content-center align-items-center w-100 h-100", {"invisible":!is_loading})}
+                    style={{
+                        position:"absolute", 
+                        top:0, 
+                        left:0, 
+                        background:"rgba(0, 0, 0, .35)",
+                        zIndex:997
+                    }}
+                >
+                    <SyncLoader
+                        color={"#fff"}
+                        loading={true}
+                        cssOverride={{position:"relative"}}
+                        size={20}
+                        aria-label="Loading Spinner"
+                        data-testid="loader"
+                    />
+                </div>
 
                 <MenuSidebar
                     show_menu={show_menu}
