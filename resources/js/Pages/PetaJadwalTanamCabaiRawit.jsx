@@ -4,7 +4,7 @@ import update from "immutability-helper"
 import L from "leaflet"
 import "leaflet.vectorgrid"
 import { toast } from "react-toastify"
-import { api } from "@/Config/api"
+import { api, api_express } from "@/Config/api"
 import { BASE_URL_XP, isUndefined } from "@/Config/config"
 import { ceil, ch_from_properties, month_selected } from "@/Config/helpers"
 import { MapContainer, TileLayer } from "react-leaflet"
@@ -14,7 +14,7 @@ import Select from "react-select"
 import CreatableSelect from "react-select/creatable"
 import MenuSidebar from "@/Components/menu_sidebar"
 import { ToastApp } from "@/Components/toast"
-import { Offcanvas } from "react-bootstrap"
+import { Modal, Offcanvas } from "react-bootstrap"
 import { Highlighter, Typeahead } from "react-bootstrap-typeahead"
 import haversine from "haversine-distance"
 import { SyncLoader } from "react-spinners"
@@ -37,7 +37,30 @@ class Frontpage extends React.Component{
         kecamatan:[],
         is_loading:false,
         mobile_show:false,
-        search_data:[]
+        search_data:[],
+        detail:{
+            is_open:false,
+            data:{}
+        }
+    }
+
+    request={
+        apiGetKecamatan:async(tahun)=>{
+            return await api_express().get("/kecamatan")
+            .then(res=>res.data)
+        }
+    }
+    //--data
+    fetchKecamatan=async()=>{
+        await this.request.apiGetKecamatan()
+        .then(data=>{
+            this.setState({
+                search_data:data.data
+            })
+        })
+        .catch(err=>{
+            toast.error("Gets Data Failed!", {position:"bottom-center"})
+        })
     }
 
     componentDidMount=async()=>{
@@ -57,6 +80,9 @@ class Frontpage extends React.Component{
         this.setState({
             map:myMap
         }, ()=>{
+            //fetch kecamatan
+            this.fetchKecamatan()
+            
             //form
             const date=new Date()
 
@@ -110,8 +136,11 @@ class Frontpage extends React.Component{
                 kecamatan:(properties, zoom)=>{
                     const ch=ch_from_properties(properties, tahun, bulan_parsed)
 
-                    let color="#8c2323"
-                    if(ch>=min && ch<=max) color="#238c3f"
+                    let color="#fff"
+                    if(ch!=""){
+                        if(ch>=min && ch<=max) color="#238c3f"
+                        else color="#8c2323"
+                    }
 
                     let zoom_opacity=0
                     if(zoom>=10) zoom_opacity=0.8
@@ -134,30 +163,107 @@ class Frontpage extends React.Component{
             const prop=e.layer.properties
             const ch=ch_from_properties(prop, tahun, bulan_parsed)
 
-            L.popup()
-            .setContent(
-                "<div class='d-flex flex-column'>"+
-                    "<div> Kecamatan : <span class='fw-bold'>"+prop.region+"</span></div>"+
-                    "<div> Curah Hujan : <span class='fw-bold'>"+ch+"</span></div>"+
-                "</div>"
-            )
-            .setLatLng(e.latlng)
-            .openOn(myMap)
-
-            var style={
-                stroke: true,
-                color: 'red',
-                weight: 2,
-                opacity: 1
+            let ch_status=""
+            if(ch!=""){
+                if(ch>max){
+                    ch_status="out_max"
+                }
+                if(ch<min){
+                    ch_status="out_min"
+                }
             }
-            vectorGrid.setFeatureStyle(prop['id_region'], style)
+
+            const data={
+                id_region:prop.id_region,
+                region:prop.region,
+                kabupaten_kota:prop.kabupaten_kota,
+                provinsi:prop.provinsi,
+                curah_hujan:ch,
+                status:ch!=""?((ch>=min && ch<=max)?"potensi":"tidak_potensi"):"",
+                curah_hujan_status:ch_status
+            }
+            this.toggleDetail(true, data)
         })
         .addTo(myMap)
 
         //state
         this.setState({
             map:myMap
+        }, ()=>{
+            //label region
+            myMap.on("dragend", e=>{
+                this.renderLabel(myMap.getCenter(), myMap.getZoom())
+            })
+            myMap.on("zoomend", e=>{
+                this.renderLabel(myMap.getCenter(), myMap.getZoom())
+            })
         })
+    }
+    renderLabel=(latlng, zoom)=>{
+        const {geo_json_label, map, search_data}=this.state
+        
+        if(zoom>=11){
+            if(geo_json_label!=null){
+                map.removeLayer(geo_json_label)
+            }
+
+            const data_geo_json=search_data.filter(f=>{
+                let coord={lat:f.map_center.latitude, lng:f.map_center.longitude}
+                
+                if(haversine(latlng, coord)<60000) return true
+                return false
+            })
+
+            let layer_group=[]
+            for(var i=0; i<data_geo_json.length; i++){
+                const layer=new L.Marker([data_geo_json[i].map_center.latitude, data_geo_json[i].map_center.longitude], {
+                    icon: new L.divIcon({
+                        className:"marker-icon",
+                        html:`
+                                <svg 
+                                    xmlns="http://www.w3.org/2000/svg" 
+                                    width="24" 
+                                    height="24" 
+                                    viewBox="0 0 24 24" 
+                                    stroke-width="2" 
+                                    stroke-linecap="round" 
+                                    stroke-linejoin="round" 
+                                    class="feather feather-map-pin" 
+                                    stroke="#f00" 
+                                    fill="#f00"
+                                >
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                    <circle 
+                                        cx="12" 
+                                        cy="10" 
+                                        r="3" 
+                                        stroke="#fff" 
+                                        fill="#fff"
+                                    />
+                                </svg>
+                            `
+                    })
+                })
+                .bindTooltip("<span>"+data_geo_json[i].region+"</span>", {
+                    permanent:true,
+                    direction:"top",
+                    sticky:true,
+                    className:"tooltip-marker"
+                })
+                layer_group=layer_group.concat([layer])
+            }
+            const label_data=L.layerGroup(layer_group)
+            map.addLayer(label_data)
+
+            this.setState({
+                geo_json_label:label_data
+            })
+        }
+        else{
+            if(geo_json_label!=null){
+                map.removeLayer(geo_json_label)
+            }
+        }
     }
 
 
@@ -262,8 +368,37 @@ class Frontpage extends React.Component{
         this.setState({mobile_show:show})
     }
     
+    //DETAIL
+    toggleDetail=(is_open=false, data={})=>{
+        this.setState({
+            detail:{
+                is_open,
+                data
+            }
+        })
+    }
+    getStatus=status=>{
+        if(status=="potensi"){
+            return (
+                <div className="d-flex align-items-center">
+                    <div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#238c3f"}}></div>
+                    <span className="fw-bold">Potensi Tanam</span>
+                </div>
+            )
+        }
+        if(status=="tidak_potensi"){
+            return (
+                <div className="d-flex align-items-center">
+                    <div class='d-flex me-1' style={{width:"25px", height:"15px", background:"#8c2323"}}></div>
+                    <span className="fw-bold">Tidak Potensi Tanam</span>
+                </div>
+            )
+        }
+        return ""
+    }
+    
     render(){
-        const {tahun, bulan, show_menu, collapse, search_data, is_loading}=this.state
+        const {tahun, bulan, show_menu, collapse, search_data, is_loading, detail}=this.state
 
         return (
             <>
@@ -300,13 +435,19 @@ class Frontpage extends React.Component{
                                         if(e.length>0){
                                             if(this.state.map==null) return
 
-                                            this.state.map.setView([e[0].center.latitude, e[0].center.longitude], e[0].center.zoom)
+                                            this.state.map.setView([e[0].map_center.latitude, e[0].map_center.longitude], e[0].map_center.zoom)
                                         }
                                     }}
                                     renderMenuItemChildren={(option, {text})=>{
                                         return (
                                             <>
                                                 <Highlighter search={text} highlightClassName="pe-0">{option.region}</Highlighter>
+                                                <div className="text-muted overflow-hidden" style={{textOverflow:"ellipsis"}}>
+                                                    <small>
+                                                        {option.kabupaten_kota}, {' '}
+                                                        {option.provinsi}
+                                                    </small>
+                                                </div>
                                             </>
                                         )
                                     }}
@@ -421,13 +562,19 @@ class Frontpage extends React.Component{
                                         if(e.length>0){
                                             if(this.state.map==null) return
 
-                                            this.state.map.setView([e[0].center.latitude, e[0].center.longitude], e[0].center.zoom)
+                                            this.state.map.setView([e[0].map_center.latitude, e[0].map_center.longitude], e[0].map_center.zoom)
                                         }
                                     }}
                                     renderMenuItemChildren={(option, {text})=>{
                                         return (
                                             <>
                                                 <Highlighter search={text} highlightClassName="pe-0">{option.region}</Highlighter>
+                                                <div className="text-muted overflow-hidden" style={{textOverflow:"ellipsis"}}>
+                                                    <small>
+                                                        {option.kabupaten_kota}, {' '}
+                                                        {option.provinsi}
+                                                    </small>
+                                                </div>
                                             </>
                                         )
                                     }}
@@ -466,6 +613,58 @@ class Frontpage extends React.Component{
                         </div>
                     </Offcanvas.Body>
                 </Offcanvas>
+
+                {/* MODAL */}
+                <Modal show={detail.is_open} onHide={()=>this.toggleDetail()} backdrop="static" scrollable>
+                    <Modal.Header closeButton>
+                        <h4 className="modal-title">Detail Lokasi</h4>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <table cellPadding="5">
+                            <tr>
+                                <th width="180">Provinsi</th>
+                                <td width="10">:</td>
+                                <td>{detail.data?.provinsi}</td>
+                            </tr>
+                            <tr>
+                                <th width="180">Kabupaten/Kota</th>
+                                <td width="10">:</td>
+                                <td>{detail.data?.kabupaten_kota}</td>
+                            </tr>
+                            <tr>
+                                <th valign="top" width="180">Kecamatan</th>
+                                <td valign="top" width="10">:</td>
+                                <td>{detail.data?.region}</td>
+                            </tr>
+                            <tr>
+                                <th valign="top" width="180">Curah Hujan</th>
+                                <td valign="top" width="10">:</td>
+                                <td>{(detail.data?.curah_hujan!=="")&&<>{detail.data?.curah_hujan} mm</>}</td>
+                            </tr>
+                            <tr>
+                                <th valign="top" width="180">Hasil Analisa</th>
+                                <td valign="top" width="10">:</td>
+                                <td>{this.getStatus(detail.data?.status)}</td>
+                            </tr>
+                        </table>
+                        <p className="mt-5 mb-2">Curah hujan optimal untuk Cabai Rawit adalah <strong>85-250 mm/bulan</strong></p>
+                        {detail.data?.curah_hujan_status=="out_max"&&
+                            <p><strong>Disclaimer :</strong> Petani tetap bisa menanam Cabai Rawit diluar rekomendasi jadwal tanam dengan mengantisipasi kelebihan curah hujan di lahan dan potensi serangan OPT, dengan melakukan persiapan dan perbaikan saluran drainase</p>
+                        }
+                        {detail.data?.curah_hujan_status=="out_min"&&
+                            <p><strong>Disclaimer :</strong> Petani tetap bisa menanam Cabai Rawit diluar rekomendasi jadwal tanam, asalkan kebutuhan air irigasi dapat tetap terpenuhi menggunakan pompa, sible, atau disel</p>
+                        }
+                    </Modal.Body>
+                    <Modal.Footer className="mt-3 border-top pt-2">
+                        <button 
+                            type="button" 
+                            className="btn btn-link text-gray me-auto" 
+                            onClick={e=>this.toggleDetail()}
+                        >
+                            Tutup
+                        </button>
+                    </Modal.Footer>
+                </Modal>
             </>
         )
     }

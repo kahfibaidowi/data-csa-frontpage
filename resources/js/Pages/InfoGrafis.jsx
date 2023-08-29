@@ -9,7 +9,7 @@ import { Head } from "@inertiajs/react"
 import { toast, ToastContainer } from "react-toastify"
 import { FiChevronDown, FiCloudRain, FiHome, FiMenu, FiWind } from "react-icons/fi"
 import * as turf from '@turf/turf'
-import { arrayMonths, ceil, centroid } from "@/Config/helpers"
+import { arrayMonths, ceil, centroid, numFix } from "@/Config/helpers"
 import { Collapse, Modal, Offcanvas } from "react-bootstrap"
 import classNames from "classnames"
 import CreatableSelect from "react-select/creatable"
@@ -177,7 +177,7 @@ class Frontpage extends React.Component{
                         <div className='container'>
                             <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
                                 <div>
-                                    <h4 class="mb-3 mb-md-0 fw-bold">Info Grafis</h4>
+                                    <h4 class="mb-3 mb-md-0 fw-bold">Infografis</h4>
                                 </div>
                                 <div class="d-flex align-items-center flex-wrap text-nowrap">
                                     <div style={{minWidth:"150px"}}>
@@ -223,7 +223,7 @@ const ControlBox=({data})=>{
             let count_rawan_kekeringan=0
 
             for(var i=0; i<36; i++){
-                const ch_i=ceil(k.curah_hujan[i].curah_hujan)
+                const ch_i=numFix(k.curah_hujan[i].curah_hujan)
 
                 //banjir
                 if(valueBanjir(ch_i)=="Rawan"){
@@ -420,12 +420,14 @@ const TableKecamatanRawanBanjir=({data})=>{
             let list_rawan=[]
 
             for(var i=0; i<36; i++){
-                const ch_i=ceil(k.curah_hujan[i].curah_hujan)
+                const ch_i=numFix(k.curah_hujan[i].curah_hujan)
+                const ch_normal=numFix(k.curah_hujan[i].curah_hujan_normal)
 
                 if(valueBanjir(ch_i)=="Rawan"){
                     count_rawan++
                     list_rawan=list_rawan.concat([Object.assign({}, k.curah_hujan[i], {
-                        curah_hujan:ch_i
+                        curah_hujan:ch_i,
+                        curah_hujan_normal:ch_normal
                     })])
                 }
             }
@@ -619,12 +621,14 @@ const TableKecamatanRawanKekeringan=({data})=>{
             let list_rawan=[]
 
             for(var i=0; i<36; i++){
-                const ch_i=ceil(k.curah_hujan[i].curah_hujan)
+                const ch_i=numFix(k.curah_hujan[i].curah_hujan)
+                const ch_normal=numFix(k.curah_hujan[i].curah_hujan_normal)
 
                 if(valueKekeringan(ch_i)=="Rawan"){
                     count_rawan++
                     list_rawan=list_rawan.concat([Object.assign({}, k.curah_hujan[i], {
-                        curah_hujan:ch_i
+                        curah_hujan:ch_i,
+                        curah_hujan_normal:ch_normal
                     })])
                 }
             }
@@ -821,12 +825,14 @@ const TableKabupatenKotaRawanBanjir=({data})=>{
             let ch_kecamatan=valueKabupatenKotaCurahHujan(d)
 
             for(var i=0; i<36; i++){
-                const ch_i=ceil(ch_kecamatan[i].curah_hujan)
+                const ch_i=numFix(ch_kecamatan[i].curah_hujan)
+                const ch_normal=numFix(ch_kecamatan[i].curah_hujan_normal)
                 
                 if(valueBanjir(ch_i)=="Rawan"){
                     count_rawan++
                     list_rawan=list_rawan.concat([Object.assign({}, ch_kecamatan[i], {
-                        curah_hujan:ch_i
+                        curah_hujan:ch_i,
+                        curah_hujan_normal:ch_normal
                     })])
                 }
             }
@@ -1058,12 +1064,14 @@ const TableKabupatenKotaRawanKekeringan=({data})=>{
             let ch_kecamatan=valueKabupatenKotaCurahHujan(d)
 
             for(var i=0; i<36; i++){
-                const ch_i=ceil(ch_kecamatan[i].curah_hujan)
+                const ch_i=numFix(ch_kecamatan[i].curah_hujan)
+                const ch_normal=numFix(ch_kecamatan[i].curah_hujan_normal)
                 
                 if(valueKekeringan(ch_i)=="Rawan"){
                     count_rawan++
                     list_rawan=list_rawan.concat([Object.assign({}, ch_kecamatan[i], {
-                        curah_hujan:ch_i
+                        curah_hujan:ch_i,
+                        curah_hujan_normal:ch_normal
                     })])
                 }
             }

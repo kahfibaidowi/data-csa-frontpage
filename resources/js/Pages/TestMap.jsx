@@ -68072,7 +68072,7 @@ class Frontpage extends React.Component{
         // }, async()=>{
         //     this.renderJSONVT2()
         // })
-        this.test2()
+        //this.test2()
 
         // const data=ch_region.data.map(r=>{
         //     return {

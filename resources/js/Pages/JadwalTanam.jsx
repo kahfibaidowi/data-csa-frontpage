@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import {FiChevronLeft, FiChevronRight} from "react-icons/fi"
 import { Modal, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { isUndefined } from '@/Config/config';
-import { arrayMonths, ceil } from '@/Config/helpers';
+import { arrayMonths, ceil, numFix } from '@/Config/helpers';
 import AnimateLineChart from '@/Components/Modules/animate_line_chart';
 import { ToastApp } from '@/Components/toast';
 
@@ -339,7 +339,8 @@ const ModalDetail=({data, hideModal})=>{
                 const find_curah_hujan=curah_hujan.find(f=>f.bulan.toString()==month.toString() && f.input_ke.toString()==i.toString())
                 if(!isUndefined(find_curah_hujan)){
                     new_curah_hujan=new_curah_hujan.concat([Object.assign({}, find_curah_hujan, {
-                        curah_hujan:ceil(find_curah_hujan.curah_hujan)
+                        curah_hujan:numFix(find_curah_hujan.curah_hujan),
+                        curah_hujan_normal:numFix(find_curah_hujan.curah_hujan_normal)
                     })])
                 }
                 else{

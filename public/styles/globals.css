@@ -903,3 +903,11 @@ thead.no-display{
 .map-show-region .gj-tooltip-region{
   visibility: visible;
 }
+.tooltip-marker{
+  top:-8px;
+  left:5px;
+  font-family:"Poppins";
+}
+.marker-icon{
+  pointer-events: none !important;
+}

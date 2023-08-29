@@ -68055,8 +68055,8 @@ class Frontpage extends React.Component{
         tahun:"",
         bulan:"",
         map:null,
-        position:[-1.973, 116.253],
-        zoom:5
+        position:[4.445523468500056, 96.19433058400006],
+        zoom:10
     }
 
     componentDidMount=async()=>{
@@ -68084,45 +68084,45 @@ class Frontpage extends React.Component{
             attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(myMap)
 
-        //tile
-        L.vectorGrid.protobuf("http://localhost:3300/kecamatan/{z}/{x}/{y}", {
-            rendererFactory: L.canvas.tile,
-            interactive: true,
-            vectorTileLayerStyles:{
-                kecamatan:properties=>{
-                    const curah_hujan=JSON.parse(properties.curah_hujan)
-                    const input_ke="2023|1|1|"
-                    const input=curah_hujan.filter(ch=>ch.indexOf(input_ke)==0)
+        // //tile
+        // L.vectorGrid.protobuf("http://localhost:3300/kecamatan/{z}/{x}/{y}", {
+        //     rendererFactory: L.canvas.tile,
+        //     interactive: true,
+        //     vectorTileLayerStyles:{
+        //         kecamatan:properties=>{
+        //             const curah_hujan=JSON.parse(properties.curah_hujan)
+        //             const input_ke="2023|1|1|"
+        //             const input=curah_hujan.filter(ch=>ch.indexOf(input_ke)==0)
 
-                    let color="#f00"
-                    if(input.length>0){
-                      const input_extracted=explode_ch_generated(input[0])
+        //             let color="#f00"
+        //             if(input.length>0){
+        //               const input_extracted=explode_ch_generated(input[0])
 
-                      if(input_extracted.curah_hujan>80) color="#00f"
-                    }
+        //               if(input_extracted.curah_hujan>80) color="#00f"
+        //             }
 
-                    return {
-                        color:"#fff",
-                        opacity:0.3,
-                        fill:true,
-                        fillColor:color,
-                        fillOpacity:1
-                    }
-                }
-            }
-        })
-        .on("click", e=>{
-            console.log(e.layer.properties)
-            L.popup()
-            .setContent(e.layer.properties.region)
-            .setLatLng(e.latlng)
-            .openOn(myMap)
-        })
-        .addTo(myMap)
+        //             return {
+        //                 color:"#fff",
+        //                 opacity:0.3,
+        //                 fill:true,
+        //                 fillColor:color,
+        //                 fillOpacity:1
+        //             }
+        //         }
+        //     }
+        // })
+        // .on("click", e=>{
+        //     console.log(e.layer.properties)
+        //     L.popup()
+        //     .setContent(e.layer.properties.region)
+        //     .setLatLng(e.latlng)
+        //     .openOn(myMap)
+        // })
+        // .addTo(myMap)
 
-        this.setState({
-            map:myMap
-        })
+        // this.setState({
+        //     map:myMap
+        // })
     }
 
 

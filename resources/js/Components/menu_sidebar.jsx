@@ -97,7 +97,7 @@ const MenuSidebar=(props)=>{
                                         </li>
                                         <li className="nav-item">
                                             <a href="/info_grafis" className={classNames("nav-link")}>
-                                                Infofrafis
+                                                Infografis
                                             </a>
                                         </li>
                                     </ul>

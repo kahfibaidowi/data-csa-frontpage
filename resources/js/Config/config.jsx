@@ -10,7 +10,7 @@ export const BASE_URL=process.env.NODE_ENV==="development"?
 //     "https://ews.garapan.id/api";
 
 export const BASE_URL_XP=process.env.NODE_ENV==="development"?
-    "https://tileserver.ewssipantara.id":
+    "http://localhost:3300":
     "https://tileserver.ewssipantara.id";
 
 //windy
