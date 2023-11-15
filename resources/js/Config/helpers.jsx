@@ -73,10 +73,19 @@ export const explode_ch_generated=(generated)=>{
     //ex=2023|10|1|85
     return {
         curah_hujan:Number(exp[3]),
-        curah_hujan_normal:Number(exp[4]),
         tahun:Number(exp[0]),
         bulan:Number(exp[1]),
         input_ke:Number(exp[2])
+    }
+}
+export const explode_ch_normal_generated=(generated)=>{
+    const exp=generated.toString().split("|")
+
+    //ex=10|1|85
+    return {
+        curah_hujan_normal:Number(exp[2]),
+        bulan:Number(exp[0]),
+        input_ke:Number(exp[1])
     }
 }
 
@@ -102,15 +111,15 @@ export const ch_from_properties=(prop_json, tahun, bulan_parsed)=>{
 
     return ch
 }
-export const ch_normal_from_properties=(prop_json, tahun, bulan_parsed)=>{
+export const ch_normal_from_properties=(prop_json, bulan_parsed)=>{
     let ch=""
 
-    const curah_hujan=JSON.parse(prop_json.curah_hujan)
-    const input_ke=tahun+"|"+bulan_parsed.bulan+"|"+bulan_parsed.input_ke+"|"
+    const curah_hujan=JSON.parse(prop_json.curah_hujan_normal)
+    const input_ke=bulan_parsed.bulan+"|"+bulan_parsed.input_ke+"|"
     const input=curah_hujan.filter(ch=>ch.indexOf(input_ke)==0)
 
     if(input.length>0){
-        const input_extracted=explode_ch_generated(input[0])
+        const input_extracted=explode_ch_normal_generated(input[0])
         ch=numFix(input_extracted.curah_hujan_normal)
     }
 
@@ -121,5 +130,14 @@ export const numFix=(number)=>{
     if(_.isNumber(number)){
         return number.toFixed(2)
     }
-    return ""
+    if(_.isEmpty(number)){
+        return ""
+    }
+    let num=Number(number)
+    
+    if(_.isNaN(num)){
+        return ""
+    }
+
+    return num.toFixed(2)
 }

@@ -1,4 +1,5 @@
 import { Layout } from "@/Components/layout"
+import update from "immutability-helper"
 import { api, api_express } from "@/Config/api"
 import _ from "underscore"
 import axios from "axios"
@@ -11,7 +12,7 @@ import { Head } from "@inertiajs/react"
 import { toast, ToastContainer } from "react-toastify"
 import { FiBarChart2, FiChevronDown, FiCloudRain, FiFilter, FiHome, FiMenu, FiWind } from "react-icons/fi"
 import * as turf from '@turf/turf'
-import { ceil, centroid, ch_from_properties, ch_normal_from_properties, explode_ch_generated, month_selected, numFix } from "@/Config/helpers"
+import { ceil, centroid, ch_from_properties, ch_normal_from_properties, explode_ch_generated, explode_ch_normal_generated, month_selected, numFix } from "@/Config/helpers"
 import { Collapse, Modal, Offcanvas } from "react-bootstrap"
 import classNames from "classnames"
 import MenuSidebar from "@/Components/menu_sidebar"
@@ -126,7 +127,7 @@ class Frontpage extends React.Component{
                 kecamatan:(properties, zoom)=>{
                     const ch=this.parseCH(tahun, bulan, properties)
                     
-                    let color=this.blockColor(ch.curah_hujan, ch.curah_hujan_normal)
+                    let color=this.blockColor(ch.curah_hujan)
 
                     let zoom_opacity=0
                     if(zoom>=10) zoom_opacity=0.8
@@ -240,7 +241,7 @@ class Frontpage extends React.Component{
             }
         }
     }
-    blockColor=(curah_hujan, normal)=>{
+    blockColor=(curah_hujan)=>{
         const value=curah_hujan.toString().trim()!=""?Number(curah_hujan):""
 
         if(value==""){
@@ -346,37 +347,57 @@ class Frontpage extends React.Component{
     parseCH=(tahun, bulan, prop)=>{
         if(bulan.toString()==""){
             const curah_hujan=JSON.parse(prop.curah_hujan)
-            const new_arr_ch=curah_hujan.filter(f=>f.indexOf(tahun.toString())==0)
+            const curah_hujan_normal=JSON.parse(prop.curah_hujan_normal)
 
+            const new_arr_ch=curah_hujan.filter(f=>f.indexOf(tahun.toString()+"|")==0)
+
+            let ch_generated={
+                curah_hujan:"",
+                curah_hujan_normal:""
+            }
             if(new_arr_ch.length>0){
                 let arr_ch=[]
-                let ch=0, ch_normal=0
+                let ch=0
                 
                 new_arr_ch.map(c=>{
                     let input_extracted=explode_ch_generated(c)
 
                     if(arr_ch.filter(f=>(f.bulan==input_extracted.bulan&&f.input_ke==input_extracted.input_ke)).length==0){
                         ch+=input_extracted.curah_hujan
+
+                        arr_ch=arr_ch.concat([input_extracted])
+                    }
+                })
+
+                ch_generated=Object.assign({}, ch_generated, {
+                    curah_hujan:numFix(ch/arr_ch.length)
+                })
+            }
+            if(curah_hujan_normal.length>0){
+                let arr_ch=[]
+                let ch_normal=0
+                
+                curah_hujan_normal.map(c=>{
+                    let input_extracted=explode_ch_normal_generated(c)
+
+                    if(arr_ch.filter(f=>(f.bulan==input_extracted.bulan&&f.input_ke==input_extracted.input_ke)).length==0){
                         ch_normal+=input_extracted.curah_hujan_normal
 
                         arr_ch=arr_ch.concat([input_extracted])
                     }
                 })
 
-                return {
-                    curah_hujan:numFix(ch/arr_ch.length),
+                ch_generated=Object.assign({}, ch_generated, {
                     curah_hujan_normal:numFix(ch_normal/arr_ch.length)
-                }
+                })
             }
-            return {
-                curah_hujan:"",
-                curah_hujan_normal:""
-            }
+
+            return ch_generated
         }
         else{
             const bulan_parsed=month_selected(bulan)
             const ch=ch_from_properties(prop, tahun, bulan_parsed)
-            const ch_normal=ch_normal_from_properties(prop, tahun, bulan_parsed)
+            const ch_normal=ch_normal_from_properties(prop, bulan_parsed)
             
             return {
                 curah_hujan:ch,

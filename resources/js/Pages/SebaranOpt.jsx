@@ -245,7 +245,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
         }))
     }
     const data_kab_kota=()=>{
-        if(data.provinsi==""){
+        if(data.province_id==""){
             return [{label:"Semua Kabupaten/Kota", value:""}]
         }
 
