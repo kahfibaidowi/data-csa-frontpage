@@ -41,10 +41,17 @@ export default class JadwalTanam extends React.Component{
             this.fetchJadwalTanamKecamatan()
         })
     }
+
+    
+    abortController=new AbortController()
     request={
         apiGetJadwalTanamKecamatan:async(params)=>{
+            this.abortController.abort()
+            this.abortController=new AbortController()
+
             return await api().get("/frontpage/summary/type/jadwal_tanam_kecamatan", {
-                params:params
+                params:params,
+                signal:this.abortController.signal
             })
             .then(res=>res.data)
         }
@@ -65,8 +72,13 @@ export default class JadwalTanam extends React.Component{
             })
         })
         .catch(err=>{
-            toast.error("Gets Data Failed!", {position:"bottom-center"})
-            this.setLoading(false)
+            if(err.name=="CanceledError"){
+                toast.warn("Request Aborted!", {position:"bottom-center"})
+            }
+            else{
+                toast.error("Gets Data Failed!", {position:"bottom-center"})
+                this.setLoading(false)
+            }
         })
     }
 
@@ -117,6 +129,9 @@ export default class JadwalTanam extends React.Component{
                 break
                 case "status":
                 case "role":
+                    this.fetchJadwalTanamKecamatan()
+                break
+                case "tahun":
                     this.fetchJadwalTanamKecamatan()
                 break
             }
