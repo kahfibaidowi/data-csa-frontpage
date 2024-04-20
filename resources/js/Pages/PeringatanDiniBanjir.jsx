@@ -328,6 +328,8 @@ class Frontpage extends React.Component{
         }
     }
     valueKekeringan=(str_value)=>{
+        if(_.isUndefined(str_value)) return ""
+        
         const value=str_value.toString().trim()!=""?Number(str_value):""
         
         if(value=="") return ""
