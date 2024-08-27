@@ -231,6 +231,38 @@ class FrontpageController extends Controller
         ]);
     }
 
+    public function bantuan_dpi()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Bantuan DPI - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('BantuanDPI', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+
+    public function bantuan_dpi_peta()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Peta Bantuan DPI - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('BantuanDPIPeta', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+
     public function info_grafis()
     {
         $pengaturan=$this->data_pengaturan();

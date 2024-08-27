@@ -64,6 +64,16 @@ export const Layout=({children, withFooter=true, pengaturan, footer})=>{
                                         <NavDropdown.Item className='fs-14px' href="/jadwal_tanam/bawang_merah">Peta Bawang Merah</NavDropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
+                                <Dropdown>
+                                    <Dropdown.Toggle className='nav-link link-dark fs-15px fw-medium' as="a" href="#">
+                                        Bantuan DPI
+                                        <FiChevronDown className='ms-1'/>
+                                    </Dropdown.Toggle>
+                                    <Dropdown.Menu>
+                                        <NavDropdown.Item className='fs-14px' href="/bantuan_dpi">Bantuan DPI Tabular</NavDropdown.Item>
+                                        <NavDropdown.Item className='fs-14px' href="/bantuan_dpi/peta">Bantuan DPI Peta</NavDropdown.Item>
+                                    </Dropdown.Menu>
+                                </Dropdown>
                             </ul>
                         </Navbar.Collapse>
                     </div>

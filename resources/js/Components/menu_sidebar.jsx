@@ -2,7 +2,7 @@ import { BASE_URL } from '@/Config/config'
 import classNames from 'classnames'
 import React from 'react'
 import { Collapse, Offcanvas } from 'react-bootstrap'
-import { FiBarChart2, FiChevronDown, FiChevronUp, FiCloudRain, FiCloudSnow, FiHome, FiWind } from 'react-icons/fi'
+import { FiBarChart2, FiChevronDown, FiChevronUp, FiCloudRain, FiCloudSnow, FiColumns, FiHome, FiWind } from 'react-icons/fi'
 
 const MenuSidebar=(props)=>{
     return (
@@ -140,6 +140,38 @@ const MenuSidebar=(props)=>{
                                         <li className="nav-item">
                                             <a href="/jadwal_tanam/bawang_merah" className={classNames("nav-link")}>
                                                 Peta Bawang Merah
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </Collapse>
+                        </li>
+                        <li 
+                            className={classNames(
+                                "nav-item",
+                                {"active":props.collapse=="bantuan_dpi"}
+                            )}
+                        >
+                            <a 
+                                className="nav-link cursor-pointer" 
+                                onClick={e=>props.setCollapse(props.collapse=="bantuan_dpi"?"":"bantuan_dpi")} 
+                                aria-expanded={props.collapse=="bantuan_dpi"}
+                            >
+                                <FiColumns className="link-icon"/>
+                                <span className="link-title">Bantuan DPI</span>
+                                <FiChevronDown className="link-arrow"/>
+                            </a>
+                            <Collapse in={props.collapse=="bantuan_dpi"}>
+                                <div>
+                                    <ul className="nav sub-menu">
+                                        <li className="nav-item">
+                                            <a href="/bantuan_dpi" className={classNames("nav-link")}>
+                                                Bantuan DPI Tabular
+                                            </a>
+                                        </li>
+                                        <li className="nav-item">
+                                            <a href="/bantuan_dpi/peta" className={classNames("nav-link")}>
+                                                Bantuan DPI Peta
                                             </a>
                                         </li>
                                     </ul>

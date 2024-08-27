@@ -77,6 +77,16 @@
                                     <a class="dropdown-item fs-14px" href="/jadwal_tanam/bawang_merah">Peta Bawang Merah</a>
                                 </div>
                             </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link link-dark fs-15px fw-medium dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  Bantuan DPI
+                                  <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="ms-1" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item fs-14px" href="/bantuan_dpi">Bantuan DPI Tabular</a>
+                                    <a class="dropdown-item fs-14px" href="/bantuan_dpi/peta">Bantuan DPI Peta</a>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </div>

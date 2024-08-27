@@ -24,6 +24,8 @@ Route::get('/jadwal_tanam', [FrontpageController::class, "jadwal_tanam"]);
 Route::get('/jadwal_tanam/cabai_rawit', [FrontpageController::class, "peta_jadwal_tanam_cabai_rawit"]);
 Route::get('/jadwal_tanam/cabai_besar', [FrontpageController::class, "peta_jadwal_tanam_cabai_besar"]);
 Route::get('/jadwal_tanam/bawang_merah', [FrontpageController::class, "peta_jadwal_tanam_bawang_merah"]);
+Route::get('/bantuan_dpi', [FrontpageController::class, "bantuan_dpi"]);
+Route::get('/bantuan_dpi/peta', [FrontpageController::class, "bantuan_dpi_peta"]);
 Route::get('/info_grafis', [FrontpageController::class, "info_grafis"]);
 Route::get('/posts', [FrontpageController::class, "posts"]);
 Route::get('/posts/page/{page}', [FrontpageController::class, "posts"]);
