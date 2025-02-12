@@ -19,6 +19,7 @@ import * as _ from "underscore"
 import ReactApexChart from "react-apexcharts"
 import BarChart from "@/Components/Modules/bar_chart"
 import { ToastApp } from "@/Components/toast"
+import CreatableSelect from "react-select/creatable"
 
 
 
@@ -307,7 +308,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                     />
                                 </div>
                                 <div style={{width:"170px"}} className="me-2">
-                                    <Select
+                                    <CreatableSelect
                                         options={data_tahun}
                                         value={data_tahun.find(f=>f.value==data.tahun)}
                                         onChange={e=>{
