@@ -199,6 +199,19 @@ class Frontpage extends React.Component{
                             <Infografis 
                                 data={sebaran_opt.infografis}
                                 is_loading={sebaran_opt.is_loading}
+                                type="lts"
+                            />
+
+                            <Infografis 
+                                data={sebaran_opt.infografis}
+                                is_loading={sebaran_opt.is_loading}
+                                type="lks"
+                            />
+
+                            <Infografis 
+                                data={sebaran_opt.infografis}
+                                is_loading={sebaran_opt.is_loading}
+                                type="lp"
                             />
                         </div>
                     </div>
@@ -343,17 +356,31 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                     <thead className="thead-light">
                                         <tr>
                                             <th className="" width="50">#</th>
-                                            <th className="">Bulan</th>
-                                            <th className="">Tahun</th>
                                             <th className="">Provinsi</th>
                                             <th className="">Kabupaten/Kota</th>
+                                            <th className="">Bulan</th>
+                                            <th className="">Tahun</th>
+                                            <th className="">Periode</th>
+                                            <th className="">Kategori</th>
                                             <th className="">Komoditas</th>
+                                            <th className="">Jenis Varietas</th>
+                                            <th className="">Satuan</th>
                                             <th className="">Jenis OPT</th>
                                             <th className="">LTS (Ringan)</th>
                                             <th className="">LTS (Sedang)</th>
                                             <th className="">LTS (Berat)</th>
-                                            <th className="">Sum of Total LTS</th>
                                             <th className="">LTS (Puso)</th>
+                                            <th className="">LKS (Ringan)</th>
+                                            <th className="">LKS (Sedang)</th>
+                                            <th className="">LKS (Berat)</th>
+                                            <th className="">LKS (Puso)</th>
+                                            <th className="">LP (Pemusnahan)</th>
+                                            <th className="">LP (Pestisida Kimia)</th>
+                                            <th className="">LP (Cara Lain)</th>
+                                            <th className="">LP (Agens Hayati)</th>
+                                            <th className="">SUM LTS</th>
+                                            <th className="">SUM LKS</th>
+                                            <th className="">SUM LP</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -362,28 +389,42 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                                 {data.data.map((list, idx)=>(
                                                     <tr key={list}>
                                                         <td className="align-middle">{(idx+1)+((data.page-1)*data.per_page)}</td>
-                                                        <td>{list.bulan}</td>
-                                                        <td>{list.tahun}</td>
                                                         <td>{list.region.parent.region}</td>
                                                         <td>{list.region.region}</td>
+                                                        <td>{list.bulan}</td>
+                                                        <td>{list.tahun}</td>
+                                                        <td>{list.periode}</td>
+                                                        <td>{list.kategori}</td>
                                                         <td>{list.komoditas}</td>
+                                                        <td>{list.jenis_varietas}</td>
+                                                        <td>{list.satuan}</td>
                                                         <td>{list.opt}</td>
                                                         <td>{list.lts_ringan}</td>
                                                         <td>{list.lts_sedang}</td>
                                                         <td>{list.lts_berat}</td>
-                                                        <td>{list.sum_lts}</td>
                                                         <td>{list.lts_puso}</td>
+                                                        <td>{list.lks_ringan}</td>
+                                                        <td>{list.lks_sedang}</td>
+                                                        <td>{list.lks_berat}</td>
+                                                        <td>{list.lks_puso}</td>
+                                                        <td>{list.lp_pemusnahan}</td>
+                                                        <td>{list.lp_pestisida_kimia}</td>
+                                                        <td>{list.lp_cara_lain}</td>
+                                                        <td>{list.lp_agens_hayati}</td>
+                                                        <td>{list.sum_lts}</td>
+                                                        <td>{list.sum_lks}</td>
+                                                        <td>{list.sum_lp}</td>
                                                     </tr>
                                                 ))}
                                                 {data.data.length==0&&
                                                     <tr>
-                                                        <td colSpan={12} className="text-center">Data tidak ditemukan!</td>
+                                                        <td colSpan={26} className="text-center">Data tidak ditemukan!</td>
                                                     </tr>
                                                 }
                                             </>
                                         :
                                             <tr>
-                                                <td colSpan={12} className="text-center">
+                                                <td colSpan={26} className="text-center">
                                                     <div className="d-flex align-items-center justify-content-center">
                                                         <Spinner
                                                             as="span"
@@ -510,20 +551,46 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
     )
 }
 
-const Infografis=({data, is_loading})=>{
+const Infografis=({data, is_loading, type="lts"})=>{
+
+    const bar_chart_data=()=>{
+        if(type=="lts"){
+            return {
+                labels:["LTS Ringan", "LTS Sedang", "LTS Berat", "LTS Puso", "Sum LTS"],
+                data:[data.sum_lts_ringan, data.sum_lts_sedang, data.sum_lts_berat, data.sum_lts_puso, data.sum_sum_lts]
+            }
+        }
+        if(type=="lks"){
+            return {
+                labels:["LKS Ringan", "LKS Sedang", "LKS Berat", "LKS Puso", "Sum LKS"],
+                data:[data.sum_lks_ringan, data.sum_lks_sedang, data.sum_lks_berat, data.sum_lks_puso, data.sum_sum_lks]
+            }
+        }
+        if(type=="lp"){
+            return {
+                labels:["LP Pemusnahan", "LP Pestisida Kimia", "LP Cara Lain", "LP Agens Hayati", "Sum LP"],
+                data:[data.sum_lp_pemusnahan, data.sum_lp_pestisida_kimia, data.sum_lp_cara_lain, data.sum_lp_agens_hayati, data.sum_sum_lp]
+            }
+        }
+
+        return {
+            labels:[],
+            data:[]
+        }
+    }
 
     return (
         <div className="row mb-4">
             <div className="col-12">
                 <div className="card">
                     <div className="card-header">
-                        <h4 class="card-title mb-0">Infografis</h4>
+                        <h4 class="card-title mb-0">Infografis {type}</h4>
                     </div>
                     <div className="card-body">
                         {!is_loading?
                             <BarChart 
-                                labels={["LTS Ringan", "LTS Sedang", "LTS Berat", "Sum LTS", "LTS Puso"]}
-                                data={[data.sum_lts_ringan, data.sum_lts_sedang, data.sum_lts_berat, data.sum_sum_lts, data.sum_lts_puso]}
+                                labels={bar_chart_data().labels}
+                                data={bar_chart_data().data}
                             />
                         :
                             <div className="d-flex align-items-center justify-content-center">

@@ -262,13 +262,27 @@ const MapWindy=(props)=>{
                                 <th className="" width="50">#</th>
                                 <th className="">Bulan</th>
                                 <th className="">Tahun</th>
+                                <th className="">Periode</th>
+                                <th className="">Kategori</th>
                                 <th className="">Komoditas</th>
+                                <th className="">Jenis Varietas</th>
+                                <th className="">Satuan</th>
                                 <th className="">Jenis OPT</th>
                                 <th className="">LTS (Ringan)</th>
                                 <th className="">LTS (Sedang)</th>
                                 <th className="">LTS (Berat)</th>
-                                <th className="">Sum of Total LTS</th>
                                 <th className="">LTS (Puso)</th>
+                                <th className="">LKS (Ringan)</th>
+                                <th className="">LKS (Sedang)</th>
+                                <th className="">LKS (Berat)</th>
+                                <th className="">LKS (Puso)</th>
+                                <th className="">LP (Pemusnahan)</th>
+                                <th className="">LP (Pestisida Kimia)</th>
+                                <th className="">LP (Cara Lain)</th>
+                                <th className="">LP (Agens Hayati)</th>
+                                <th className="">SUM LTS</th>
+                                <th className="">SUM LKS</th>
+                                <th className="">SUM LP</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -279,18 +293,32 @@ const MapWindy=(props)=>{
                                             <td className="align-middle">{(idx+1)}</td>
                                             <td>{list.bulan}</td>
                                             <td>{list.tahun}</td>
+                                            <td>{list.periode}</td>
+                                            <td>{list.kategori}</td>
                                             <td>{list.komoditas}</td>
+                                            <td>{list.jenis_varietas}</td>
+                                            <td>{list.satuan}</td>
                                             <td>{list.opt}</td>
                                             <td>{list.lts_ringan}</td>
                                             <td>{list.lts_sedang}</td>
                                             <td>{list.lts_berat}</td>
-                                            <td>{list.sum_lts}</td>
                                             <td>{list.lts_puso}</td>
+                                            <td>{list.lks_ringan}</td>
+                                            <td>{list.lks_sedang}</td>
+                                            <td>{list.lks_berat}</td>
+                                            <td>{list.lks_puso}</td>
+                                            <td>{list.lp_pemusnahan}</td>
+                                            <td>{list.lp_pestisida_kimia}</td>
+                                            <td>{list.lp_cara_lain}</td>
+                                            <td>{list.lp_agens_hayati}</td>
+                                            <td>{list.sum_lts}</td>
+                                            <td>{list.sum_lks}</td>
+                                            <td>{list.sum_lp}</td>
                                         </tr>
                                     ))}
                                     {detail.data.sebaran_opt.length==0&&
                                         <tr>
-                                            <td colSpan={10} className="text-center">Data tidak ditemukan!</td>
+                                            <td colSpan={24} className="text-center">Data tidak ditemukan!</td>
                                         </tr>
                                     }
                                 </>
