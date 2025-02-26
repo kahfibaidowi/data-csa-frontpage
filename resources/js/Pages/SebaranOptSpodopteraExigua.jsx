@@ -20,64 +20,80 @@ import ReactApexChart from "react-apexcharts"
 import BarChart from "@/Components/Modules/bar_chart"
 import { ToastApp } from "@/Components/toast"
 import CreatableSelect from "react-select/creatable"
+import LineChart from "@/Components/Modules/line_chart"
 
 
 
 class Frontpage extends React.Component{
     state={
-        sebaran_opt:{
-            infografis:{},
+        curah_hujan:{
             data:[],
-            page:1,
-            per_page:15,
-            last_page:1,
-            komoditas:"",
             tahun:"",
-            bulan:"",
             province_id:"",
             regency_id:"",
+            id_region:"",
             is_loading:false
         },
         region:{
             provinsi:[],
-            kab_kota:[]
+            kab_kota:[],
+            kecamatan:[]
         }
     }
 
     componentDidMount=async()=>{
-        this.fetchSebaranOptRegion()
-        this.fetchSebaranOpt()
+        this.fetchAllRegion()
     }
 
     abortController=new AbortController()
     request={
-        apiGetsSebaranOpt:async(params)=>{
+        apiGetsCurahHujan:async(params)=>{
             this.abortController.abort()
             this.abortController=new AbortController()
 
-            return await api().get("/frontpage/sebaran_opt", {
+            return await api().get("/frontpage/curah_hujan/sebaran_opt", {
                 params:params,
                 signal:this.abortController.signal
             })
             .then(res=>res.data)
         },
-        apiGetsSebaranOptRegion:async()=>{
-            return await api().get("/frontpage/sebaran_opt/region")
+        apiGetsAllRegion:async()=>{
+            return await api().get("/frontpage/region/type/all")
             .then(res=>res.data)
         }
     }
-    fetchSebaranOpt=async()=>{
-        const {data, infografis, ...params}=this.state.sebaran_opt
+    fetchCurahHujan=async()=>{
+        const {data,  ...params}=this.state.curah_hujan
+
+        if(params.id_region=="" || params.tahun==""){
+            this.setState({
+                curah_hujan:update(this.state.curah_hujan, {
+                    data:{$set:[]}
+                })
+            })
+            return
+        }
 
         this.setLoading(true)
-        await this.request.apiGetsSebaranOpt(params)
+        await this.request.apiGetsCurahHujan(params)
         .then(data=>{
+            const new_data=data.data.map(list=>{
+                const _0165xch=0.165*list.curah_hujan
+                const _ch2=Math.pow(list.curah_hujan, 2)
+                const _0002269xch2=0.002269*_ch2
+                const prediksi_spodoptera_exigua=377.8+_0165xch-_0002269xch2
+    
+                return Object.assign({}, list, {
+                    _0165xch:_0165xch,
+                    _ch2:_ch2,
+                    _0002269xch2:_0002269xch2,
+                    prediksi_spodoptera_exigua:prediksi_spodoptera_exigua
+                })
+            })
+
             this.setState({
-                sebaran_opt:update(this.state.sebaran_opt, {
-                    infografis:{$set:data.infografis},
-                    data:{$set:data.data.data},
-                    page:{$set:data.data.current_page},
-                    last_page:{$set:data.data.last_page},
+                curah_hujan:update(this.state.curah_hujan, {
+                    data:{$set:new_data},
                     is_loading:{$set:false}
                 })
             })
@@ -92,8 +108,8 @@ class Frontpage extends React.Component{
             }
         })
     }
-    fetchSebaranOptRegion=async()=>{
-        await this.request.apiGetsSebaranOptRegion()
+    fetchAllRegion=async()=>{
+        await this.request.apiGetsAllRegion()
         .then(data=>{
             this.setState({
                 region:data.data
@@ -107,37 +123,16 @@ class Frontpage extends React.Component{
     //TABLE
     setLoading=(loading)=>{
         this.setState({
-            sebaran_opt:update(this.state.sebaran_opt, {
+            curah_hujan:update(this.state.curah_hujan, {
                 is_loading:{$set:loading}
             })
-        })
-    }
-    setPerPage=e=>{
-        const target=e.target
-
-        this.setState({
-            sebaran_opt:update(this.state.sebaran_opt, {
-                per_page:{$set:target.value},
-                page:{$set:1}
-            })
-        }, ()=>{
-            this.fetchSebaranOpt()
-        })
-    }
-    goToPage=page=>{
-        this.setState({
-            sebaran_opt:update(this.state.sebaran_opt, {
-                page:{$set:page}
-            })
-        }, ()=>{
-            this.fetchSebaranOpt()
         })
     }
     typeFilter=e=>{
         const target=e.target
 
         this.setState({
-            sebaran_opt:update(this.state.sebaran_opt, {
+            curah_hujan:update(this.state.curah_hujan, {
                 page:{$set:1},
                 [target.name]:{$set:target.value}
             })
@@ -145,15 +140,25 @@ class Frontpage extends React.Component{
             switch(target.name){
                 case "province_id":
                     this.setState({
-                        sebaran_opt:update(this.state.sebaran_opt, {
-                            regency_id:{$set:""}
+                        curah_hujan:update(this.state.curah_hujan, {
+                            regency_id:{$set:""},
+                            id_region:{$set:""}
                         })
                     }, ()=>{
-                        this.fetchSebaranOpt()
+                        this.fetchCurahHujan()
+                    })
+                break;
+                case "regency_id":
+                    this.setState({
+                        curah_hujan:update(this.state.curah_hujan, {
+                            id_region:{$set:""}
+                        })
+                    }, ()=>{
+                        this.fetchCurahHujan()
                     })
                 break;
                 default:
-                    this.fetchSebaranOpt()
+                    this.fetchCurahHujan()
             }
         })
     }
@@ -167,12 +172,12 @@ class Frontpage extends React.Component{
     }
 
     render(){
-        const {sebaran_opt, region}=this.state
+        const {curah_hujan, region}=this.state
 
         return (
             <>
                 <Head>
-                    <title>Sebaran OPT</title>
+                    <title>Sebaran OPT Spodoptera Exigua</title>
                 </Head>
                 
                 <Layout {...this.props}>
@@ -180,7 +185,7 @@ class Frontpage extends React.Component{
                         <div className='container'>
                             <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
                                 <div>
-                                    <h4 class="mb-3 mb-md-0 fw-bold">Sebaran OPT</h4>
+                                    <h4 class="mb-3 mb-md-0 fw-bold">Sebaran OPT (Spodoptera Exigua)</h4>
                                 </div>
                                 <div class="d-flex align-items-center flex-wrap text-nowrap">
                                     <div style={{minWidth:"150px"}}>
@@ -189,7 +194,7 @@ class Frontpage extends React.Component{
                             </div>
                             
                             <TableSebaranOpt 
-                                data={sebaran_opt}
+                                data={curah_hujan}
                                 region={region}
                                 setPerPage={this.setPerPage}
                                 goToPage={this.goToPage}
@@ -197,22 +202,10 @@ class Frontpage extends React.Component{
                             />
 
                             <Infografis 
-                                data={sebaran_opt.infografis}
-                                is_loading={sebaran_opt.is_loading}
-                                type="lts"
+                                data={curah_hujan}
+                                is_loading={curah_hujan.is_loading}
                             />
 
-                            <Infografis 
-                                data={sebaran_opt.infografis}
-                                is_loading={sebaran_opt.is_loading}
-                                type="lks"
-                            />
-
-                            <Infografis 
-                                data={sebaran_opt.infografis}
-                                is_loading={sebaran_opt.is_loading}
-                                type="lp"
-                            />
                         </div>
                     </div>
                 </Layout>
@@ -229,29 +222,16 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
     const [mobile_show, setMobileShow]=useState(false)
 
     //filter
-    const data_komoditas=[
-        {label:"Semua Komoditas", value:""},
-        {label:"Aneka Cabai", value:"Aneka Cabai"},
-        {label:"Bawang Merah", value:"Bawang Merah"}
-    ]
     const data_tahun=[
-        {label:"Semua Tahun", value:""},
-        {label:"2020", value:"2020"},
-        {label:"2021", value:"2021"},
-        {label:"2022", value:"2022"}
+        {label:"Pilih Tahun", value:""},
+        {label:"2023", value:"2023"},
+        {label:"2024", value:"2024"},
+        {label:"2025", value:"2025"}
     ]
-    const data_bulan=()=>{
-        return [{label:"Semua Bulan", value:""}].concat(Array.from({length:12}, (_, i)=>{
-            return {
-                label:i+1,
-                value:i+1
-            }
-        }))
-    }
     const data_provinsi=()=>{
         let prov=region.provinsi
 
-        return [{label:"Semua Provinsi", value:""}].concat(prov.map(p=>{
+        return [{label:"Pilih Provinsi", value:""}].concat(prov.map(p=>{
             return {
                 label:p.region,
                 value:p.id_region
@@ -260,27 +240,29 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
     }
     const data_kab_kota=()=>{
         if(data.province_id==""){
-            return [{label:"Semua Kabupaten/Kota", value:""}]
+            return [{label:"Pilih Kabupaten/Kota", value:""}]
         }
 
         let filtered_kab_kota=region.kab_kota.filter(d=>d.nested==data.province_id)
-        return [{label:"Semua Kabupaten/Kota", value:""}].concat(filtered_kab_kota.map(p=>{
+        return [{label:"Pilih Kabupaten/Kota", value:""}].concat(filtered_kab_kota.map(p=>{
             return {
                 label:p.region,
                 value:p.id_region
             }
         }))
     }
-    const totalFilter=()=>{
-        let total=0
+    const data_kecamatan=()=>{
+        if(data.regency_id==""){
+            return [{label:"Pilih Kecamatan", value:""}]
+        }
 
-        if(data.province_id!="") total++
-        if(data.regency_id!="") total++
-        if(data.komoditas!="") total++
-        if(data.tahun!="") total++
-        if(data.bulan!="") total++
-
-        return total
+        let filtered_kecamatan=region.kecamatan.filter(d=>d.nested==data.regency_id)
+        return [{label:"Pilih Kecamatan", value:""}].concat(filtered_kecamatan.map(p=>{
+            return {
+                label:p.region,
+                value:p.id_region
+            }
+        }))
     }
 
     return (
@@ -297,7 +279,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                         onChange={e=>{
                                             typeFilter({target:{name:"province_id", value:e.value}})
                                         }}
-                                        placeholder="Semua Provinsi"
+                                        placeholder="Pilih Provinsi"
                                     />
                                 </div>
                                 <div style={{width:"200px"}} className="me-2">
@@ -307,17 +289,17 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                         onChange={e=>{
                                             typeFilter({target:{name:"regency_id", value:e.value}})
                                         }}
-                                        placeholder="Semua Kabupaten/Kota"
+                                        placeholder="Pilih Kabupaten/Kota"
                                     />
                                 </div>
                                 <div style={{width:"200px"}} className="me-2">
                                     <Select
-                                        options={data_komoditas}
-                                        value={data_komoditas.find(f=>f.value==data.komoditas)}
+                                        options={data_kecamatan()}
+                                        value={data_kecamatan().find(f=>f.value==data.id_region)}
                                         onChange={e=>{
-                                            typeFilter({target:{name:"komoditas", value:e.value}})
+                                            typeFilter({target:{name:"id_region", value:e.value}})
                                         }}
-                                        placeholder="Semua Komoditas"
+                                        placeholder="Pilih Kecamatan"
                                     />
                                 </div>
                                 <div style={{width:"170px"}} className="me-2">
@@ -327,17 +309,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                         onChange={e=>{
                                             typeFilter({target:{name:"tahun", value:e.value}})
                                         }}
-                                        placeholder="Semua Tahun"
-                                    />
-                                </div>
-                                <div style={{width:"170px"}} className="me-2">
-                                    <Select
-                                        options={data_bulan()}
-                                        value={data_bulan().find(f=>f.value==data.bulan)}
-                                        onChange={e=>{
-                                            typeFilter({target:{name:"bulan", value:e.value}})
-                                        }}
-                                        placeholder="Semua Bulan"
+                                        placeholder="Pilih Tahun"
                                     />
                                 </div>
                             </div>
@@ -348,7 +320,7 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                     onClick={e=>setMobileShow(true)}
                                 >
                                     <FiFilter className="btn-icon-prepend"/>
-                                    Filter {totalFilter()>0&&<>({totalFilter()})</>}
+                                    Filter
                                 </button>
                             </div>
                             <div className="table-responsive">
@@ -358,29 +330,17 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                             <th className="" width="50">#</th>
                                             <th className="">Provinsi</th>
                                             <th className="">Kabupaten/Kota</th>
+                                            <th className="">Kabupaten/Kota</th>
                                             <th className="">Bulan</th>
-                                            <th className="">Tahun</th>
-                                            <th className="">Periode</th>
-                                            <th className="">Kategori</th>
-                                            <th className="">Komoditas</th>
-                                            <th className="">Jenis Varietas</th>
-                                            <th className="">Satuan</th>
-                                            <th className="">Jenis OPT</th>
-                                            <th className="">LTS (Ringan)</th>
-                                            <th className="">LTS (Sedang)</th>
-                                            <th className="">LTS (Berat)</th>
-                                            <th className="">LTS (Puso)</th>
-                                            <th className="">LKS (Ringan)</th>
-                                            <th className="">LKS (Sedang)</th>
-                                            <th className="">LKS (Berat)</th>
-                                            <th className="">LKS (Puso)</th>
-                                            <th className="">LP (Pemusnahan)</th>
-                                            <th className="">LP (Pestisida Kimia)</th>
-                                            <th className="">LP (Cara Lain)</th>
-                                            <th className="">LP (Agens Hayati)</th>
-                                            <th className="">SUM LTS</th>
-                                            <th className="">SUM LKS</th>
-                                            <th className="">SUM LP</th>
+                                            <th className="">Input Ke</th>
+                                            <th className="">Curah Hujan</th>
+                                            <th className="">377.8</th>
+                                            <th className="">0.165</th>
+                                            <th className="">0.165xCH</th>
+                                            <th className="">0.002269</th>
+                                            <th className="">CH<sup>2</sup></th>
+                                            <th className="">0.002269xCH<sup>2</sup></th>
+                                            <th className="">Prediksi OPT</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -388,43 +348,31 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                             <>
                                                 {data.data.map((list, idx)=>(
                                                     <tr key={list}>
-                                                        <td className="align-middle">{(idx+1)+((data.page-1)*data.per_page)}</td>
+                                                        <td className="align-middle">{(idx+1)}</td>
+                                                        <td>{list.region.parent.parent.region}</td>
                                                         <td>{list.region.parent.region}</td>
                                                         <td>{list.region.region}</td>
                                                         <td>{list.bulan}</td>
-                                                        <td>{list.tahun}</td>
-                                                        <td>{list.periode}</td>
-                                                        <td>{list.kategori}</td>
-                                                        <td>{list.komoditas}</td>
-                                                        <td>{list.jenis_varietas}</td>
-                                                        <td>{list.satuan}</td>
-                                                        <td>{list.opt}</td>
-                                                        <td>{list.lts_ringan}</td>
-                                                        <td>{list.lts_sedang}</td>
-                                                        <td>{list.lts_berat}</td>
-                                                        <td>{list.lts_puso}</td>
-                                                        <td>{list.lks_ringan}</td>
-                                                        <td>{list.lks_sedang}</td>
-                                                        <td>{list.lks_berat}</td>
-                                                        <td>{list.lks_puso}</td>
-                                                        <td>{list.lp_pemusnahan}</td>
-                                                        <td>{list.lp_pestisida_kimia}</td>
-                                                        <td>{list.lp_cara_lain}</td>
-                                                        <td>{list.lp_agens_hayati}</td>
-                                                        <td>{list.sum_lts}</td>
-                                                        <td>{list.sum_lks}</td>
-                                                        <td>{list.sum_lp}</td>
+                                                        <td>{list.input_ke}</td>
+                                                        <td>{list.curah_hujan}</td>
+                                                        <td className="">377.8</td>
+                                                        <td className="">0.165</td>
+                                                        <td className="">{list._0165xch}</td>
+                                                        <td className="">0.002269</td>
+                                                        <td className="">{list._ch2}</td>
+                                                        <td className="">{list._0002269xch2}</td>
+                                                        <td className="">{list.prediksi_spodoptera_exigua}</td>
                                                     </tr>
                                                 ))}
                                                 {data.data.length==0&&
                                                     <tr>
-                                                        <td colSpan={26} className="text-center">Data tidak ditemukan!</td>
+                                                        <td colSpan={14} className="text-center">Data tidak ditemukan!</td>
                                                     </tr>
                                                 }
                                             </>
                                         :
                                             <tr>
-                                                <td colSpan={26} className="text-center">
+                                                <td colSpan={14} className="text-center">
                                                     <div className="d-flex align-items-center justify-content-center">
                                                         <Spinner
                                                             as="span"
@@ -442,46 +390,6 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="d-flex align-items-center mt-4">
-                                <div className="d-flex flex-column">
-                                    <div>Halaman {data.page} dari {data.last_page}</div>
-                                </div>
-                                <div className="d-flex align-items-center me-auto ms-3">
-                                    <select className="form-select" name="per_page" value={data.per_page} onChange={e=>setPerPage(e)}>
-                                        <option value="15">15 Data</option>
-                                        <option value="25">25 Data</option>
-                                        <option value="50">50 Data</option>
-                                        <option value="100">100 Data</option>
-                                    </select>
-                                </div>
-                                <div className="d-flex ms-3">
-                                    <button 
-                                        className={classNames(
-                                            "btn",
-                                            "border-0",
-                                            {"btn-secondary":data.page>1}
-                                        )}
-                                        disabled={data.page<=1}
-                                        onClick={()=>goToPage(data.page-1)}
-                                    >
-                                        <FiChevronLeft/>
-                                        Prev
-                                    </button>
-                                    <button 
-                                        className={classNames(
-                                            "btn",
-                                            "border-0",
-                                            {"btn-secondary":data.page<data.last_page},
-                                            "ms-2"
-                                        )}
-                                        disabled={data.page>=data.last_page}
-                                        onClick={()=>goToPage(data.page+1)}
-                                    >
-                                        Next
-                                        <FiChevronRight/>
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -494,54 +402,44 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
                 </Offcanvas.Header>
                 <Offcanvas.Body>
                     <div className="d-flex flex-column mb-3 mt-3">
-                        <div className="mb-2">
+                        <div style={{width:"200px"}} className="me-2">
                             <Select
                                 options={data_provinsi()}
                                 value={data_provinsi().find(f=>f.value==data.province_id)}
                                 onChange={e=>{
                                     typeFilter({target:{name:"province_id", value:e.value}})
                                 }}
-                                placeholder="Semua Provinsi"
+                                placeholder="Pilih Provinsi"
                             />
                         </div>
-                        <div className="mb-2">
+                        <div style={{width:"200px"}} className="me-2">
                             <Select
                                 options={data_kab_kota()}
                                 value={data_kab_kota().find(f=>f.value==data.regency_id)}
                                 onChange={e=>{
                                     typeFilter({target:{name:"regency_id", value:e.value}})
                                 }}
-                                placeholder="Semua Kabupaten/Kota"
+                                placeholder="Pilih Kabupaten/Kota"
                             />
                         </div>
-                        <div className="mb-2">
+                        <div style={{width:"200px"}} className="me-2">
                             <Select
-                                options={data_komoditas}
-                                value={data_komoditas.find(f=>f.value==data.komoditas)}
+                                options={data_kecamatan()}
+                                value={data_kecamatan().find(f=>f.value==data.id_region)}
                                 onChange={e=>{
-                                    typeFilter({target:{name:"komoditas", value:e.value}})
+                                    typeFilter({target:{name:"id_region", value:e.value}})
                                 }}
-                                placeholder="Semua Komoditas"
+                                placeholder="Pilih Kecamatan"
                             />
                         </div>
-                        <div className="mb-2">
+                        <div style={{width:"170px"}} className="me-2">
                             <CreatableSelect
                                 options={data_tahun}
                                 value={data_tahun.find(f=>f.value==data.tahun)}
                                 onChange={e=>{
                                     typeFilter({target:{name:"tahun", value:e.value}})
                                 }}
-                                placeholder="Semua Tahun"
-                            />
-                        </div>
-                        <div className="mb-2">
-                            <Select
-                                options={data_bulan()}
-                                value={data_bulan().find(f=>f.value==data.bulan)}
-                                onChange={e=>{
-                                    typeFilter({target:{name:"bulan", value:e.value}})
-                                }}
-                                placeholder="Semua Bulan"
+                                placeholder="Pilih Tahun"
                             />
                         </div>
                     </div>
@@ -551,31 +449,27 @@ const TableSebaranOpt=({data, region, setPerPage, goToPage, typeFilter})=>{
     )
 }
 
-const Infografis=({data, is_loading, type="lts"})=>{
+const Infografis=({data, is_loading})=>{
 
-    const bar_chart_data=()=>{
-        if(type=="lts"){
-            return {
-                labels:["LTS Ringan", "LTS Sedang", "LTS Berat", "LTS Puso", "Sum LTS"],
-                data:[data.sum_lts_ringan, data.sum_lts_sedang, data.sum_lts_berat, data.sum_lts_puso, data.sum_sum_lts]
-            }
-        }
-        if(type=="lks"){
-            return {
-                labels:["LKS Ringan", "LKS Sedang", "LKS Berat", "LKS Puso", "Sum LKS"],
-                data:[data.sum_lks_ringan, data.sum_lks_sedang, data.sum_lks_berat, data.sum_lks_puso, data.sum_sum_lks]
-            }
-        }
-        if(type=="lp"){
-            return {
-                labels:["LP Pemusnahan", "LP Pestisida Kimia", "LP Cara Lain", "LP Agens Hayati", "Sum LP"],
-                data:[data.sum_lp_pemusnahan, data.sum_lp_pestisida_kimia, data.sum_lp_cara_lain, data.sum_lp_agens_hayati, data.sum_sum_lp]
-            }
-        }
-
+    const line_chart_data=()=>{
         return {
-            labels:[],
-            data:[]
+            labels:data.data.map(d=>(d.bulan+"-"+d.input_ke)),
+            datasets:[
+                {
+                    label:"Curah Hujan",
+                    data:data.data.map(d=>d.curah_hujan),
+                    borderWidth:1,
+                    borderColor:"#3446eb",
+                    backgroundColor:"#3446eb"
+                },
+                {
+                    label:"Prediksi Spodoptera Exigua",
+                    data:data.data.map(d=>d.prediksi_spodoptera_exigua),
+                    borderWidth:1,
+                    borderColor:"#eb8034",
+                    backgroundColor:"#eb8034"
+                }
+            ]
         }
     }
 
@@ -584,13 +478,13 @@ const Infografis=({data, is_loading, type="lts"})=>{
             <div className="col-12">
                 <div className="card">
                     <div className="card-header">
-                        <h4 class="card-title mb-0">Infografis {type}</h4>
+                        <h4 class="card-title mb-0">Infografis</h4>
                     </div>
                     <div className="card-body">
                         {!is_loading?
-                            <BarChart 
-                                labels={bar_chart_data().labels}
-                                data={bar_chart_data().data}
+                            <LineChart 
+                                labels={line_chart_data().labels}
+                                datasets={line_chart_data().datasets}
                             />
                         :
                             <div className="d-flex align-items-center justify-content-center">

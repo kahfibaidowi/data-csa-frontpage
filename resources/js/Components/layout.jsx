@@ -36,6 +36,8 @@ export const Layout=({children, withFooter=true, pengaturan, footer})=>{
                                     <Dropdown.Menu>
                                         <NavDropdown.Item className='fs-14px' href="/sebaran_opt">Data Sebaran</NavDropdown.Item>
                                         <NavDropdown.Item className='fs-14px' href="/sebaran_opt/peta">Peta Sebaran</NavDropdown.Item>
+                                        <NavDropdown.Item className='fs-14px' href="/sebaran_opt/spodoptera_exigua">Prediksi Spodoptera Exigua</NavDropdown.Item>
+                                        <NavDropdown.Item className='fs-14px' href="/sebaran_opt/alternaria_porri">Prediksi Alternaria Porri</NavDropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
                                 <Dropdown>

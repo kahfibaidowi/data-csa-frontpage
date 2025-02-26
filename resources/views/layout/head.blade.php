@@ -52,6 +52,8 @@
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item fs-14px" href="/sebaran_opt">Data Sebaran</a>
                                     <a class="dropdown-item fs-14px" href="/sebaran_opt/peta">Peta Sebaran</a>
+                                    <a class="dropdown-item fs-14px" href="/sebaran_opt/spodoptera_exigua">Prediksi Spodoptera Exigua</a>
+                                    <a class="dropdown-item fs-14px" href="/sebaran_opt/alternaria_porri">Prediksi Alternaria Porri</a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">

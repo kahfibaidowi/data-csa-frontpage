@@ -119,6 +119,38 @@ class FrontpageController extends Controller
         ]);
     }
 
+    public function sebaran_opt_spodoptera_exigua()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Sebaran OPT Spodoptera Exigua - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('SebaranOptSpodopteraExigua', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+
+    public function sebaran_opt_alternaria_porri()
+    {
+        $pengaturan=$this->data_pengaturan();
+        $footer=$this->data_footer();
+
+        //--meta
+        HeadLibrary::addTag("<title>Sebaran OPT Alternaria Porri - ".$pengaturan['title']."</title>");
+        HeadLibrary::addTag("<meta name='robots' content='noindex, nofollow'/>");
+
+        //--render
+        return Inertia::render('SebaranOptAlternariaPorri', [
+            'footer'        =>$footer,
+            'pengaturan'    =>$pengaturan
+        ]);
+    }
+
     public function peringatan_dini()
     {
         $pengaturan=$this->data_pengaturan();

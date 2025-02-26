@@ -63,6 +63,16 @@ const MenuSidebar=(props)=>{
                                                 Peta Sebaran
                                             </a>
                                         </li>
+                                        <li className="nav-item">
+                                            <a href="/sebaran_opt/spodoptera_exigua" className={classNames("nav-link")}>
+                                                Prediksi Spodoptera Exigua
+                                            </a>
+                                        </li>
+                                        <li className="nav-item">
+                                            <a href="/sebaran_opt/alternaria_porri" className={classNames("nav-link")}>
+                                                Prediksi Alternaria Porri
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </Collapse>

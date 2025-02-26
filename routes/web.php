@@ -32,6 +32,8 @@ Route::get('/posts/page/{page}', [FrontpageController::class, "posts"]);
 Route::get('/post/{id}/{title}', [FrontpageController::class, "post"]);
 Route::get('/sebaran_opt', [FrontpageController::class, "sebaran_opt"]);
 Route::get('/sebaran_opt/peta', [FrontpageController::class, "peta_sebaran_opt"]);
+Route::get('/sebaran_opt/spodoptera_exigua', [FrontpageController::class, "sebaran_opt_spodoptera_exigua"]);
+Route::get('/sebaran_opt/alternaria_porri', [FrontpageController::class, "sebaran_opt_alternaria_porri"]);
 Route::get('/test_map', [FrontpageController::class, "test_map"]);
 Route::get('/test_map_vector_tile', [FrontpageController::class, "test_map_vector_tile"]);
 Route::get('/test', [FrontpageController::class, "test"]);
